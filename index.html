@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<!--
+=====================  CONFIGURACIÓN DE SUPABASE (ejecutar una vez en el SQL Editor)  =====================
+create table public.players(
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text, data jsonb, score int default 0, tower_done int default 0, updated_at timestamptz default now());
+alter table public.players enable row level security;
+create policy "own_select" on public.players for select using (auth.uid()=id);
+create policy "own_insert" on public.players for insert with check (auth.uid()=id);
+create policy "own_update" on public.players for update using (auth.uid()=id);
+create policy "own_delete" on public.players for delete using (auth.uid()=id);
+create view public.ranking as select username,score,tower_done from public.players order by score desc limit 100;
+grant select on public.ranking to anon, authenticated;
+==========================================================================================================
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>MCU Gacha Arena</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#070b16}
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(1200px 600px at 50% -10%,#1b2447 0,#070b16 60%);color:#e2e8f0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none;user-select:none}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:900px;margin:0 auto}
+#view{flex:1;overflow-y:auto;padding:12px 12px 90px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#0b1226f2;border-top:1px solid #1e293b;display:flex;max-width:900px;margin:0 auto}
+nav button{flex:1;padding:8px 2px 10px;font-size:10px;font-weight:800;color:#64748b;display:flex;flex-direction:column;align-items:center;gap:2px;transition:.2s}
+nav button span{font-size:20px}
+nav button.on{color:#facc15;text-shadow:0 0 10px #facc1566}
+.panel{background:linear-gradient(160deg,#111a33,#0a1022);border:1px solid #1e293b;border-radius:14px;padding:12px}
+.btn{background:linear-gradient(180deg,#3b82f6,#1d4ed8);color:#fff;font-weight:900;border-radius:12px;padding:10px 14px;font-size:14px;box-shadow:0 4px 0 #1e3a8a;transition:.1s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #1e3a8a}
+.btn.gold{background:linear-gradient(180deg,#facc15,#ca8a04);color:#1c1400;box-shadow:0 4px 0 #854d0e}
+.btn.red{background:linear-gradient(180deg,#ef4444,#b91c1c);box-shadow:0 4px 0 #7f1d1d}
+.btn.gray{background:#334155;box-shadow:0 4px 0 #1e293b}
+.btn:disabled{opacity:.4;filter:grayscale(.6)}
+.sub{flex:1;padding:8px;border-radius:10px;background:#111a33;font-weight:800;font-size:12px;color:#94a3b8;border:1px solid #1e293b}
+.sub.on{background:#1d4ed8;color:#fff}
+.chip{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;background:#111a33;border:1px solid #1e293b;color:#94a3b8}
+.chip.on{background:#facc15;color:#000}
+.card{--c:#3b82f6;position:relative;border:2px solid var(--c);border-radius:14px;background:linear-gradient(160deg,#131d3b,#0a1022);box-shadow:0 0 12px -2px var(--c),inset 0 0 18px -8px var(--c);overflow:hidden;cursor:pointer}
+.card.S::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-100%);animation:shine 2.8s infinite;pointer-events:none}
+@keyframes shine{to{transform:translateX(100%)}}
+.card.locked{filter:grayscale(1) brightness(.4)}
+.card .tb{position:absolute;top:4px;left:4px;font-size:10px;font-weight:900;color:#000;padding:0 6px;border-radius:6px}
+.card .lb{position:absolute;top:4px;right:4px;font-size:10px;font-weight:900;background:#000a;padding:0 5px;border-radius:6px}
+.slot{border:2px dashed #334155;border-radius:14px;display:flex;align-items:center;justify-content:center;min-height:62px;color:#475569;font-size:22px}
+.fnode{aspect-ratio:1;border-radius:12px;font-weight:900;border:2px solid #334155;background:#0f172a;color:#64748b}
+.fnode.done{background:#14532d;border-color:#22c55e;color:#86efac}
+.fnode.cur{background:#78350f;border-color:#facc15;color:#fde68a;animation:pulse 1.2s infinite}
+.fnode.boss{border-color:#ef4444}
+@keyframes pulse{50%{transform:scale(1.08);box-shadow:0 0 14px #facc15aa}}
+/* Combate */
+#battle{background:radial-gradient(900px 500px at 50% 40%,#16204a 0,#060914 70%)}
+.fcard{position:relative;width:168px;text-align:center;background:#0d1530cc;border:2px solid #334155;border-radius:16px;padding:8px 10px;transition:transform .1s}
+.fcard[data-side=A]{border-color:#3b82f6;box-shadow:0 0 18px -4px #3b82f6}
+.fcard[data-side=B]{border-color:#ef4444;box-shadow:0 0 18px -4px #ef4444}
+.fcard.aura-gold{border-color:#facc15!important;box-shadow:0 0 30px 4px #facc15aa!important;animation:aura 1.6s infinite}
+@keyframes aura{50%{box-shadow:0 0 46px 10px #facc15cc}}
+.fcard[data-side=A].lunge{animation:lungeUp .35s}
+.fcard[data-side=B].lunge{animation:lungeDown .35s}
+@keyframes lungeUp{40%{transform:translateY(-40px) scale(1.08)}}
+@keyframes lungeDown{40%{transform:translateY(40px) scale(1.08)}}
+.fcard.hit{animation:hitf .3s}
+@keyframes hitf{25%{transform:translateX(-8px);filter:brightness(2) saturate(2)}60%{transform:translateX(8px)}}
+.hpbar{height:10px;background:#1e293b;border-radius:6px;overflow:hidden;margin-top:4px}
+.hpbar i{display:block;height:100%;background:linear-gradient(90deg,#16a34a,#4ade80);transition:width .45s ease}
+.hpbar.sm{height:5px;margin-top:2px}
+.enbar{height:4px;background:#1e293b;border-radius:4px;overflow:hidden;margin-top:3px}
+.enbar i{display:block;height:100%;background:#facc15;transition:width .3s}
+.bchip{width:40px;text-align:center;font-size:20px;background:#0d1530;border:1px solid #1e293b;border-radius:10px;padding:2px 3px;transition:.2s}
+.bchip.act{border-color:#facc15;transform:scale(1.1)}
+.bchip.dead{filter:grayscale(1);opacity:.35}
+.float{position:absolute;left:50%;top:25%;transform:translateX(-50%);font-weight:900;font-size:22px;pointer-events:none;text-shadow:0 2px 4px #000;animation:floatUp 1s forwards;white-space:nowrap;z-index:5}
+.float.dmg{color:#ef4444}.float.crit{color:#facc15;font-size:36px}.float.heal{color:#4ade80}.float.txt{color:#e2e8f0;font-size:14px}.float.sk{color:#67e8f9;font-size:15px}
+@keyframes floatUp{0%{opacity:0;margin-top:10px}15%{opacity:1}100%{opacity:0;margin-top:-70px}}
+.sshake{animation:sshake .4s}
+@keyframes sshake{20%{transform:translate(-8px,5px)}40%{transform:translate(7px,-6px)}60%{transform:translate(-5px,-4px)}80%{transform:translate(4px,5px)}}
+.fall{animation:fall .5s forwards}
+@keyframes fall{to{opacity:.25;transform:scale(.85) rotate(-6deg);filter:grayscale(1)}}
+/* Sobres */
+.packshake{display:inline-block;animation:pshake .6s infinite}
+@keyframes pshake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) scale(1.05)}75%{transform:rotate(8deg) scale(1.05)}}
+.flipin{animation:flipin .85s cubic-bezier(.2,.8,.2,1)}
+@keyframes flipin{0%{transform:rotateY(540deg) scale(.2);opacity:0}100%{transform:rotateY(0) scale(1);opacity:1}}
+.flashgo{animation:flashgo .8s}
+@keyframes flashgo{0%{opacity:1}100%{opacity:0}}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#0f172a;border:1px solid #facc15;color:#fde68a;padding:8px 16px;border-radius:12px;font-weight:800;font-size:13px;z-index:120;animation:toast 2.2s forwards}
+@keyframes toast{0%{opacity:0;top:0}10%,85%{opacity:1;top:14px}100%{opacity:0}}
+input{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;color:#fff;width:100%;font-size:14px;user-select:text}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH ===== -->
+<div id="auth" class="hidden fixed inset-0 z-[90] overflow-y-auto" style="background:radial-gradient(900px 500px at 50% 0,#1b2447,#070b16)">
+  <div class="max-w-sm mx-auto p-5 pt-14">
+    <div class="text-center mb-5"><div class="text-5xl">🦸</div><div class="text-2xl font-black mt-1"><span class="text-red-500">MCU</span> GACHA ARENA</div><div class="text-xs text-slate-400">Colecciona · Combate · Domina el multiverso</div></div>
+    <div id="authWarn" class="hidden panel text-[12px] text-amber-300 mb-3"></div>
+    <div class="panel">
+      <div id="authTabs" class="flex gap-2 mb-3"><button class="sub on" id="tLogin" onclick="authMode('login')">Entrar</button><button class="sub" id="tReg" onclick="authMode('reg')">Registrarse</button></div>
+      <div class="space-y-2">
+        <input id="aUser" placeholder="Nombre de usuario" maxlength="16" autocomplete="username" autocapitalize="off">
+        <input id="aPass" type="password" placeholder="Contraseña (mín. 6)">
+      </div>
+      <button class="btn w-full mt-3" id="aGo" onclick="authGo()">Entrar</button>
+      <div id="aMsg" class="text-xs text-center mt-2 text-amber-300 min-h-[16px]"></div>
+    </div>
+    <div class="text-center text-xs text-slate-500 my-3">— o —</div>
+    <div class="panel">
+      <input id="lUser" placeholder="Nombre de jugador (modo local)" maxlength="16">
+      <button class="btn gray w-full mt-2" onclick="playLocal()">Jugar sin cuenta (solo en este dispositivo)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="hidden">
+  <header class="flex items-center justify-between px-3 py-2 border-b border-slate-800" style="background:#0b1226e6">
+    <div class="font-black text-sm tracking-wide"><span class="text-red-500">MCU</span> GACHA <span id="sync" class="text-[10px] text-slate-500 ml-1"></span></div>
+    <div class="flex gap-3 text-sm font-black"><span id="hCoins">🪙 0</span><span id="hFrags">🧩 0</span></div>
+  </header>
+  <main id="view"></main>
+  <nav>
+    <button data-t="tower" onclick="go('tower')"><span>🏰</span>TORRE</button>
+    <button data-t="tourn" onclick="go('tourn')"><span>🏆</span>TORNEOS</button>
+    <button data-t="col" onclick="go('col')"><span>🦸</span>COLECCIÓN</button>
+    <button data-t="shop" onclick="go('shop')"><span>🛒</span>TIENDA</button>
+    <button data-t="set" onclick="go('set')"><span>⚙️</span>AJUSTES</button>
+  </nav>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div id="modal" class="hidden fixed inset-0 z-[70] items-end sm:items-center justify-center" style="background:#000b" onclick="if(event.target===this)closeModal()">
+  <div id="modalBody" class="w-full max-w-md max-h-[92dvh] overflow-y-auto panel" style="border-radius:20px 20px 0 0"></div>
+</div>
+
+<!-- ===== COMBATE ===== -->
+<div id="battle" class="hidden fixed inset-0 z-[75] flex-col">
+  <div class="flex items-center justify-between px-3 py-2 text-xs font-black">
+    <div id="bTitle" class="truncate">Combate</div>
+    <div class="flex gap-2">
+      <button class="chip" onclick="bSpeed()" id="bSpd">x1</button>
+      <button class="chip" onclick="BSKIP=true">⏭ Saltar</button>
+      <button class="chip" onclick="bFlee()">🏳 Huir</button>
+    </div>
+  </div>
+  <div id="benchB" class="flex gap-1 justify-center p-1"></div>
+  <div class="flex-1 flex flex-col items-center justify-around">
+    <div id="stB"></div>
+    <div class="text-2xl font-black text-slate-600">VS</div>
+    <div id="stA"></div>
+  </div>
+  <div id="benchA" class="flex gap-1 justify-center p-1"></div>
+  <div id="bLog" class="h-14 text-center text-[11px] text-slate-300 px-3 overflow-hidden leading-4 pb-2"></div>
+</div>
+
+<!-- ===== SOBRES ===== -->
+<div id="packOv" class="hidden fixed inset-0 z-[85] items-center justify-center flex-col" style="background:#000e">
+  <div id="flash" class="absolute inset-0 pointer-events-none opacity-0"></div>
+  <div id="packStage" class="relative text-center" style="perspective:900px"></div>
+  <div id="packHint" class="mt-5 text-sm text-slate-300 font-bold"></div>
+  <button id="packSkip" class="absolute top-3 right-3 chip">Saltar ⏭</button>
+</div>
+
+<script id="core">
+/* ===================== DATOS ===================== */
+const RAW = [
+ ['Iron Man','Hero','🦾',120,31,9,'Tech'], ['Captain America','Hero','🛡️',130,24,11,'Avengers'],
+ ['Thor','Hero','⚡',150,32,9,'Asgard'], ['Hulk','Hero','💚',160,28,7,'Avengers'],
+ ['Black Widow','Hero','🕷️',95,22,5,'Avengers'], ['Hawkeye','Hero','🏹',90,26,4,'Avengers'],
+ ['Falcon','Hero','🦅',100,21,5,'Avengers'], ['Winter Soldier','Hero','❄️',115,28,6,'Avengers'],
+ ['Vision','Hero','👁️️',125,30,8,'Tech'], ['Ant-Man','Hero','🐜',90,18,5,'Tech'],
+ ['Scarlet Witch','Hero','🔮',115,35,4,'Multiverse'], ['Doctor Strange','Hero','🌀',120,29,7,'Multiverse'],
+ ['Wolverine','Hero','🐺',130,27,9,'Multiverse'], ['Deadpool','Hero','🎭',120,25,5,'Multiverse'],
+ ['America Chavez','Hero','🌟',105,27,5,'Multiverse'], ['Spider-Man','Hero','🕸️️',105,24,6,'Street'],
+ ['Daredevil','Hero','😈',95,21,6,'Street'], ['Moon Knight','Hero','🌙',110,23,7,'Street'],
+ ['Punisher','Hero','💀',85,25,4,'Street'], ['Shang-Chi','Hero','🐉',110,26,7,'Street'],
+ ['Black Panther','Hero','🐆',125,27,10,'Wakanda'], ['Shuri','Hero','🔬',100,26,6,'Wakanda'],
+ ['Okoye','Hero','🔱',110,22,9,'Wakanda'], ['Captain Marvel','Hero','⭐',140,33,10,'Cosmic'],
+ ['Namor','Hero','🌊',135,29,9,'Cosmic'], ['Star-Lord','Hero','🎧',100,22,4,'Guardians'],
+ ['Gamora','Hero','⚔️',110,25,6,'Guardians'], ['Drax','Hero','🔪',135,23,8,'Guardians'],
+ ['Rocket','Hero','🦝',85,26,3,'Guardians'], ['Groot','Hero','🌳',140,19,11,'Guardians'],
+ ['Nebula','Hero','🤖',105,24,7,'Guardians'], ['Thanos','Villain','🧤',160,35,12,'Cosmic'],
+ ['Loki','Villain','🐍',105,24,5,'Asgard'], ['Hela','Villain','🦌',145,34,8,'Asgard'],
+ ['Ultron','Villain','🧠',135,30,10,'Tech'], ['Kang','Villain','⏳',120,31,7,'Multiverse'],
+ ['Dormammu','Villain','🔥',150,33,11,'Cosmic'], ['Gorr','Villain','🖤',140,32,8,'Cosmic'],
+ ['Ego','Villain','🪐',160,34,10,'Cosmic'], ['Green Goblin','Villain','🎃',100,28,5,'Villains'],
+ ['Venom','Villain','👅',140,29,7,'Villains'], ['Mysterio','Villain','🌫️',85,20,3,'Villains'],
+ ['Red Skull','Villain','☠️',100,23,6,'Villains'], ['Ronan','Villain','🔨',135,30,9,'Villains'],
+ ['Abomination','Villain','🐊',150,26,10,'Villains'], ['Doc Ock','Villain','🐙',110,27,8,'Villains'],
+ ['Killmonger','Villain','⛓️',115,29,8,'Wakanda']
+];
+const AB_RAW = [
+ ['Iron Man','ironman','Unibeam','normal','Golpe concentrado del 220% de daño que ignora la defensa rival.'],
+ ['Captain America','cap','Maestría en Absorción','P','+3 DEF con cada ataque que realiza (máx. +15) y devuelve el 20% del daño recibido.'],
+ ['Thor','thor','Rayo Divino','slow','Triple daño y electrocuta al rival: 15 HP de daño extra por turno durante 2 turnos.'],
+ ['Hulk','hulk','Furia Desbordada','P','+5 ATK permanente con cada golpe que da o recibe (máx. +40).'],
+ ['Black Widow','bw','Precisión de Asesina','P','Cada ataque suma +10% de probabilidad de crítico, acumulable durante el duelo.'],
+ ['Hawkeye','hawkeye','Ojo de Halcón','P','Probabilidad de crítico permanente del 25% (1 de cada 4 ataques hace x2).'],
+ ['Falcon','falcon','Vuelo Evasivo','P','20% de probabilidad de esquivar por completo cualquier ataque.'],
+ ['Winter Soldier','winter','Brazo de Vibranium','P','Probabilidad de crítico permanente del 15%.'],
+ ['Vision','vision','Fase Intangible','P','El primer ataque que recibe en cada duelo lo atraviesa sin hacerle daño.'],
+ ['Ant-Man','antman','Encogimiento Pym','normal','Golpea al 80% y encoge al rival: su ATK se reduce a la mitad de forma permanente.'],
+ ['Scarlet Witch','scarlet','Estructura de la Realidad','slow','Roba el 60% de la vida actual del rival y se la suma a la suya.'],
+ ['Doctor Strange','strange','Bucle Temporal','slow','Retrocede el tiempo: recupera la vida que tenía al empezar el duelo.'],
+ ['Wolverine','wolverine','Células Adaptativas','P','Recupera el 10% de su HP máxima al inicio de cada uno de sus turnos.'],
+ ['Deadpool','deadpool','Factor Curativo Inmortal','P','La primera vez que su HP llega a 0, resucita al instante con el 60% de su vida máxima.'],
+ ['America Chavez','america','Portal Estelar','fast','Golpe del 100% y abre un portal: esquiva por completo el siguiente ataque recibido.'],
+ ['Spider-Man','spider','Inmovilización con Telaraña','fast','Daño + inmoviliza al rival 1 turno completo: se salta su siguiente ataque.'],
+ ['Daredevil','daredevil','Sentidos Agudizados','P','30% de probabilidad fija de esquivar por completo cualquier ataque.'],
+ ['Moon Knight','moonknight','Avatar de Khonshu','P','Cuanto más herido está, más fuerte pega: hasta +60% de daño con la vida casi agotada.'],
+ ['Punisher','punisher','Último Cartucho','P','Gana +2% de daño de ataque por cada 1% de HP que le falte.'],
+ ['Shang-Chi','shang','Diez Anillos','fast','Doble ataque seguido; cada golpe puede ser crítico.'],
+ ['Black Panther','bp','Traje Cinético','P','Acumula el 25% del daño recibido y lo suma como daño extra en su siguiente impacto.'],
+ ['Shuri','shuri','Pulso Tecnológico','normal','Golpea al 80% y reduce la DEF rival a la mitad de forma permanente.'],
+ ['Okoye','okoye','Lanza Dora Milaje','P','Sus ataques ignoran el 30% de la DEF rival.'],
+ ['Captain Marvel','marvel','Absorción Binaria','normal','Golpe del 150% y se cura el 100% del daño infligido.'],
+ ['Namor','namor','Embestida de Talokan','P','Su primer ataque de cada duelo inflige un 50% más de daño.'],
+ ['Star-Lord','starlord','Ráfaga de Blasters','fast','Tres disparos seguidos, cada uno con el 60% del daño.'],
+ ['Gamora','gamora','La Mujer Más Letal','P','+30% de daño contra rivales con menos del 50% de vida.'],
+ ['Drax','drax','Destructor Inamovible','P','Inmune a golpes críticos y a la inmovilización.'],
+ ['Rocket','rocket','Arsenal Improvisado','P','20% de probabilidad de disparar un ataque extra con el 50% de daño.'],
+ ['Groot','groot','Espinas Vivas','P','Devuelve 6 de daño fijo al atacante por cada golpe recibido.'],
+ ['Nebula','nebula','Sobrecarga Cibernética','normal','Sus siguientes 3 ataques infligen un 50% más de daño.'],
+ ['Thanos','thanos','El Chasquido','slow','Daño masivo imparable (250% de ATK) y el 35% de ese daño a todos los suplentes rivales.'],
+ ['Loki','loki','Intercambio Ilusorio','normal','Intercambia su % de vida con el del rival.'],
+ ['Hela','hela','Dios de la Muerte','slow','Inflige el 40% de la vida actual del rival, sin poder esquivarse.'],
+ ['Ultron','ultron','Copia de Seguridad','P','La primera vez que baja del 30% de vida, se restaura un 40% de su vida máxima.'],
+ ['Kang','kang','Sobrecarga Temporal','normal','Pone la energía del rival a 0% y golpea con un 120% de daño.'],
+ ['Dormammu','dormammu','Dimensión Oscura','slow','Golpea y prende al rival en llamas oscuras: pierde el 10% de su HP máxima durante 3 turnos.'],
+ ['Gorr','gorr','Carnicero de Dioses','P','+50% de daño contra personajes Asgard y Cosmic.'],
+ ['Ego','ego','Expansión Celestial','slow','Se cura el 35% de su vida máxima y gana +10 ATK permanente.'],
+ ['Green Goblin','goblin','Toxina de Plasma','P','Sus ataques envenenan: el rival pierde el 6% de su HP máxima cada turno.'],
+ ['Venom','venom','Devorador Simbionte','normal','Si el rival tiene menos del 30% de vida, lo ejecuta al instante. Si no, muerde al 150%.'],
+ ['Mysterio','mysterio','Ilusión Total','fast','Golpea al 80% y confunde al rival 2 turnos.'],
+ ['Red Skull','redskull','Maldición del Teseracto','normal','Golpea y reduce la HP máxima del rival un 20%.'],
+ ['Ronan','ronan','Martillo Universal','normal','Golpe del 250% de daño; sufre un retroceso del 10% de su HP.'],
+ ['Abomination','abomination','Furia Gamma','P','Con menos del 50% de vida gana +40% de daño.'],
+ ['Doc Ock','docock','Tentáculos Mecánicos','P','Cada ataque añade 8 de daño fijo que ignora la defensa.'],
+ ['Killmonger','killmonger','Jaque Mate','fast','Golpe del 140% y su siguiente ataque es un crítico garantizado.']
+];
+const TIERS={E:{color:'#3b82f6',ic:'🔵',n:'Azul'},D:{color:'#22c55e',ic:'🟢',n:'Verde'},C:{color:'#a855f7',ic:'🟣',n:'Morado'},B:{color:'#f97316',ic:'🟠',n:'Naranja'},A:{color:'#ef4444',ic:'🔴',n:'Rojo'},S:{color:'#facc15',ic:'🟡',n:'Dorado'}};
+const TIER_ORDER=['E','D','C','B','A','S'];
+const TIER_LIST={
+ E:['Okoye','Drax','Mysterio','Red Skull','Doc Ock'],
+ D:['Moon Knight','Punisher','Star-Lord','Rocket','Groot','Nebula','Namor','Ronan','Killmonger','America Chavez','Gamora'],
+ C:['Daredevil','Falcon','Winter Soldier','Ultron','Kang','Ego','Gorr','Abomination','Shuri'],
+ B:['Black Widow','Hawkeye','Black Panther','Green Goblin','Ant-Man','Vision','Shang-Chi','Loki'],
+ A:['Iron Man','Captain America','Hulk','Venom','Captain Marvel','Hela','Dormammu'],
+ S:['Thanos','Thor','Doctor Strange','Scarlet Witch','Deadpool','Spider-Man','Wolverine']};
+const CH={};
+RAW.forEach(r=>CH[r[0]]={name:r[0],type:r[1],emoji:r[2],hp:r[3],atk:r[4],def:r[5],team:r[6]});
+AB_RAW.forEach(a=>{CH[a[0]].ab={id:a[1],name:a[2],kind:a[3],desc:a[4]}});
+TIER_ORDER.forEach(t=>TIER_LIST[t].forEach(n=>CH[n].tier=t));
+const NAMES=Object.keys(CH);
+const stAt=(b,l)=>Math.round(b*(1+(l-1)*0.04));
+const stats=(n,l)=>({hp:stAt(CH[n].hp,l),atk:stAt(CH[n].atk,l),def:stAt(CH[n].def,l)});
+const abOf=l=>Math.max(1,Math.ceil(l/2));
+
+/* ===================== PROBABILIDADES ===================== */
+const PROBS={
+ welcome:{E:50,D:35,C:15},
+ basic:{E:45,D:30,C:15,B:7,A:2.5,S:.5},
+ premium:{E:20,D:30,C:28,B:15,A:5.5,S:1.5},
+ free:{E:70,C:29,B:1},
+ tower:{E:60,C:25,B:14.9,S:.1}};
+function rollTier(p){let r=Math.random()*Object.values(p).reduce((a,b)=>a+b,0);for(const k in p){r-=p[k];if(r<=0)return k}return Object.keys(p)[0]}
+function drawCard(p){const l=TIER_LIST[rollTier(p)];return l[Math.floor(Math.random()*l.length)]}
+
+/* ===================== MOTOR DE COMBATE ===================== */
+let UID=0;
+const THR={fast:60,normal:90,slow:120};
+const kd=f=>1+0.08*(f.abLvl-1), kb=f=>1+0.05*(f.abLvl-1), hl=f=>0.02*(f.abLvl-1);
+const has=(f,id)=>f.abLvl>0&&f.abId===id;
+const R=()=>Math.random();
+function base(o){return Object.assign({uid:'f'+(++UID),dead:false,energy:0,bonusAtk:0,bonusDef:0,critAcc:0,stun:0,conf:0,shock:null,burn:null,poison:0,boost:0,nextCrit:false,dodgeNext:false,used:{},stored:0,abLvl:0,abId:'none',abKind:'P',team:'-',lvl:1,aura:''},o)}
+function mkF(name,lvl,abLvl,x){x=x||{};const c=CH[name],m=x.all||1;const hp=Math.round(stAt(c.hp,lvl)*m*(x.hp||1));
+ return base({name,label:x.label||name,emoji:c.emoji,team:c.team,lvl,max:hp,hp,atk:Math.round(stAt(c.atk,lvl)*m*(x.atk||1)),def:Math.round(stAt(c.def,lvl)*m*(x.def||1)),abId:c.ab.id,abKind:c.ab.kind,abLvl,aura:x.aura||''})}
+const MN={hp:100,atk:19,def:5};
+function mkMin(s,m){const hp=Math.round(MN.hp*m);return base({name:s.label,label:s.label,emoji:s.emoji,team:'Minion',max:hp,hp,atk:Math.round(MN.atk*m),def:Math.round(MN.def*m)+1})}
+function icons(f){return(f.stun>0?'💤':'')+(f.conf>0?'😵':'')+(f.shock&&f.shock.t>0?'⚡':'')+(f.burn&&f.burn.t>0?'🔥':'')+(f.poison?'☠️':'')+(f.boost>0?'💢':'')+(f.bonusAtk>0?'⬆️':'')+(f.dodgeNext?'🌀':'')+(f.nextCrit?'🎯':'')}
+
+const SK={
+ ironman:(B,m,f)=>B.hit(m,f,2.2*kd(m),{ign:1}),
+ thor:(B,m,f)=>{if(B.hit(m,f,3*kd(m))>0&&!f.dead)f.shock={t:2,d:Math.round(15*kd(m))}},
+ antman:(B,m,f)=>{if(B.hit(m,f,.8*kd(m))>0&&!f.shrunk){f.shrunk=1;f.atk=Math.round(f.atk/2);B.say(f,'🐜 ATK a la mitad')}},
+ scarlet:(B,m,f)=>{const x=Math.max(1,Math.round(f.hp*Math.min(.95,.6*kd(m))));B.hurt(f,x);B.heal(m,x,'Robo de vida')},
+ strange:(B,m,f)=>{B.heal(m,Math.max(0,m.startHp-m.hp)+m.max*hl(m),'⏪ Bucle temporal')},
+ america:(B,m,f)=>{B.hit(m,f,1*kd(m));m.dodgeNext=true},
+ spider:(B,m,f)=>{if(B.hit(m,f,1*kd(m))>0&&!has(f,'drax')&&!f.dead)f.stun=1},
+ shang:(B,m,f)=>{B.hit(m,f,1*kd(m));B.hit(m,f,1*kd(m))},
+ starlord:(B,m,f)=>{for(let i=0;i<3;i++)B.hit(m,f,.6*kd(m))},
+ shuri:(B,m,f)=>{if(B.hit(m,f,.8*kd(m))>0&&!f.halfDef){f.halfDef=1;f.def=Math.round(f.def/2);f.bonusDef=Math.round(f.bonusDef/2);B.say(f,'🛡️ DEF a la mitad')}},
+ marvel:(B,m,f)=>{const d=B.hit(m,f,1.5*kd(m));B.heal(m,d,'Absorción')},
+ nebula:(B,m,f)=>{B.hit(m,f,1);m.boost=3;B.say(m,'💢 +ATK x3')},
+ thanos:(B,m,f)=>{const d=B.hit(m,f,2.5*kd(m),{noDodge:1});B.T[f.side].filter(x=>x!==f&&!x.dead).forEach(x=>B.hurt(x,d*.35))},
+ loki:(B,m,f)=>{const a=m.hp/m.max,b=f.hp/f.max;m.hp=Math.max(1,Math.round(b*m.max));f.hp=Math.max(1,Math.round(a*f.max));B.ev.push({k:'hpset',f:m,hp:m.hp,max:m.max},{k:'hpset',f,hp:f.hp,max:f.max});B.say(m,'🔀 Intercambio')},
+ hela:(B,m,f)=>{B.hurt(f,Math.max(1,f.hp*Math.min(.9,.4*kd(m))))},
+ kang:(B,m,f)=>{f.energy=0;B.say(f,'⚡ Energía a 0');B.hit(m,f,1.2*kd(m))},
+ dormammu:(B,m,f)=>{if(B.hit(m,f,1*kd(m))>0&&!f.dead)f.burn={t:3,p:.10}},
+ ego:(B,m,f)=>{B.heal(m,m.max*(.35+hl(m)),'Expansión');m.atk+=Math.round(10*kb(m))},
+ venom:(B,m,f)=>{if(f.hp<f.max*.3){B.say(m,'☠️ ¡Ejecución!');B.hurt(f,f.hp)}else B.hit(m,f,1.5*kd(m))},
+ mysterio:(B,m,f)=>{if(B.hit(m,f,.8*kd(m))>0&&!f.dead)f.conf=2},
+ redskull:(B,m,f)=>{if(B.hit(m,f,1*kd(m))>0&&!f.dead){f.max=Math.max(1,Math.round(f.max*(1-Math.min(.6,.2*kb(m)))));f.hp=Math.min(f.hp,f.max);B.ev.push({k:'hpset',f,hp:f.hp,max:f.max});B.say(f,'HP máx -20%')}},
+ ronan:(B,m,f)=>{B.hit(m,f,2.5*kd(m));B.hurt(m,Math.min(m.max*.1,m.hp-1))},
+ killmonger:(B,m,f)=>{B.hit(m,f,1.4*kd(m));m.nextCrit=true}
+};
+
+class Battle{
+ constructor(a,b){this.T={A:a,B:b};a.forEach(f=>f.side='A');b.forEach(f=>f.side='B');this.ev=[];this.cur='A';this.over=false;this.winner=null;this.turns=0;this.shown={};this.settle()}
+ on(s){return this.T[s].find(f=>!f.dead)}
+ settle(){['A','B'].forEach(s=>{const f=this.on(s);if(!f){this.over=true;if(!this.winner)this.winner=s==='A'?'B':'A';return}
+  if(this.shown[s]!==f){this.shown[s]=f;if(f.startHp===undefined)f.startHp=f.hp;this.ev.push({k:'enter',f,side:s,hp:f.hp,max:f.max,en:f.energy,thr:(f.abLvl>0?THR[f.abKind]:0)||0,s:icons(f)})}})}
+ say(f,txt){this.ev.push({k:'txt',f,txt})}
+ stEv(f){this.ev.push({k:'st',f,s:icons(f),en:f.energy,thr:(f.abLvl>0?THR[f.abKind]:0)||0})}
+ heal(f,amt,txt){amt=Math.round(Math.min(amt,f.max-f.hp));if(amt<=0||f.dead)return;f.hp+=amt;this.ev.push({k:'heal',f,amt,hp:f.hp,max:f.max,txt})}
+ hurt(t,amt,o){o=o||{};amt=Math.round(amt);if(t.dead||amt<=0)return 0;t.hp-=amt;
+  this.ev.push({k:'dmg',f:t,amt,crit:!!o.crit,hp:Math.max(0,t.hp),max:t.max,dot:!!o.dot});
+  if(t.hp<=0){
+   if(has(t,'deadpool')&&!t.used.rev){t.used.rev=1;t.hp=Math.round(t.max*Math.min(1,.6+hl(t)));this.ev.push({k:'heal',f:t,amt:t.hp,hp:t.hp,max:t.max,txt:'¡Resucita!'})}
+   else{t.hp=0;t.dead=true;this.ev.push({k:'down',f:t})}
+  }else if(has(t,'ultron')&&!t.used.bk&&t.hp<t.max*.3){t.used.bk=1;this.heal(t,t.max*Math.min(1,.4+hl(t)),'Copia de seguridad')}
+  return amt}
+ hit(me,foe,mult,o){o=o||{};if(me.dead||foe.dead)return 0;
+  if(!o.noDodge){
+   if(has(foe,'vision')&&!foe.used.ph){foe.used.ph=1;this.say(foe,'👁️ Intangible');return 0}
+   if(foe.dodgeNext){foe.dodgeNext=false;this.say(foe,'🌀 ¡Portal!');return 0}
+   let dc=0;if(has(foe,'falcon'))dc=.2*kb(foe);if(has(foe,'daredevil'))dc=.3*kb(foe);
+   if(dc&&R()<Math.min(dc,.6)){this.say(foe,'💨 ¡Esquiva!');return 0}}
+  let cc=0;if(has(me,'hawkeye'))cc+=.25*kb(me);if(has(me,'winter'))cc+=.15*kb(me);cc+=me.critAcc;
+  let crit=false;if(!o.noCrit){crit=me.nextCrit||R()<cc;me.nextCrit=false;if(has(foe,'drax'))crit=false}
+  let m=mult;
+  if(has(me,'moonknight'))m*=1+.6*kb(me)*(1-me.hp/me.max);
+  if(has(me,'punisher'))m*=1+.02*kb(me)*100*(1-me.hp/me.max);
+  if(has(me,'gamora')&&foe.hp<foe.max*.5)m*=1+.3*kb(me);
+  if(has(me,'gorr')&&(foe.team==='Asgard'||foe.team==='Cosmic'))m*=1+.5*kb(me);
+  if(has(me,'abomination')&&me.hp<me.max*.5)m*=1+.4*kb(me);
+  if(has(me,'namor')&&!me.used.first){me.used.first=1;m*=1+.5*kb(me)}
+  if(me.boost>0)m*=1+.5*kb(me);
+  if(crit)m*=2;
+  let d=foe.def+foe.bonusDef,ign=o.ign||0;if(has(me,'okoye'))ign=Math.max(ign,.3*kb(me));d*=1-Math.min(1,ign);
+  let dmg=(me.atk+me.bonusAtk)*m*(.9+R()*.2)*100/(100+d*4);
+  if(has(me,'docock'))dmg+=8*kb(me);
+  if(has(me,'bp')&&me.stored>0){dmg+=me.stored;me.stored=0}
+  const dealt=this.hurt(foe,Math.max(1,dmg),{crit});
+  if(has(me,'hulk'))me.bonusAtk=Math.min(40*kb(me),me.bonusAtk+5*kb(me));
+  if(has(foe,'hulk'))foe.bonusAtk=Math.min(40*kb(foe),foe.bonusAtk+5*kb(foe));
+  if(has(me,'cap'))me.bonusDef=Math.min(15*kb(me),me.bonusDef+3);
+  if(has(me,'bw'))me.critAcc+=.10*kb(me);
+  if(has(me,'goblin'))foe.poison=.06*kb(me);
+  if(has(foe,'bp'))foe.stored+=dealt*.25*kb(foe);
+  if(!foe.dead){
+   if(has(foe,'cap'))this.hurt(me,dealt*.2*kb(foe));
+   if(has(foe,'groot'))this.hurt(me,6*kb(foe));}
+  return dealt}
+ act(me,foe){
+  if(has(me,'wolverine'))this.heal(me,me.max*(.1+hl(me)),'Regeneración');
+  if(me.shock&&me.shock.t>0){this.hurt(me,me.shock.d,{dot:1});me.shock.t--}
+  if(me.burn&&me.burn.t>0){this.hurt(me,me.max*me.burn.p,{dot:1});me.burn.t--}
+  if(me.poison)this.hurt(me,me.max*me.poison,{dot:1});
+  if(me.dead)return;
+  me.energy=Math.min(150,me.energy+30);
+  if(me.stun>0){me.stun--;this.say(me,'💤 Inmovilizado');return}
+  if(me.conf>0){me.conf--;if(R()<.5){this.say(me,'😵 Confundido');return}}
+  this.ev.push({k:'lunge',f:me});
+  const thr=me.abLvl>0?THR[me.abKind]:0;
+  if(thr&&me.energy>=thr){me.energy-=thr;this.ev.push({k:'skill',f:me,txt:CH[me.name]?CH[me.name].ab.name:''});SK[me.abId](this,me,foe)}
+  else{this.hit(me,foe,1);if(has(me,'rocket')&&R()<.2*kb(me)&&!foe.dead){this.say(me,'🚀 Disparo extra');this.hit(me,foe,.5)}}
+  if(me.boost>0)me.boost--}
+ step(){if(this.over)return;const s=this.cur,o=s==='A'?'B':'A',me=this.on(s),foe=this.on(o);this.turns++;
+  this.act(me,foe);this.stEv(me);this.stEv(foe);this.settle();
+  if(!this.over&&this.turns>300){const r=x=>this.T[x].reduce((a,f)=>a+f.hp,0)/this.T[x].reduce((a,f)=>a+f.max,0);this.over=true;this.winner=r('A')>r('B')?'A':'B'}
+  this.cur=o}
+}
+
+/* ===================== TORRE ===================== */
+const PH=[
+ {boss:'Red Skull',title:'Red Skull — Maestro de Hydra',mn:['Esbirro de Hydra','🪖'],pool:['E','D']},
+ {boss:'Abomination',title:'Abomination — Furia Gamma',mn:['Agente de Hydra','🪖'],pool:['E','D']},
+ {boss:'Loki',title:'Loki — Dios de las Mentiras',mn:['Dron de Ultron','🤖'],pool:['D','C']},
+ {boss:'Ultron',title:'Ultron — La Era de Ultron',mn:['Centinela Ultron','🤖'],pool:['D','C']},
+ {boss:'Scarlet Witch',title:'Scarlet Witch — Darkhold',mn:['Cultista Darkhold','🧙'],pool:['C','B']},
+ {boss:'Hela',title:'Hela — Diosa de la Muerte',mn:['Guerrero Muerto','💀'],pool:['C','B']},
+ {boss:'Kang',title:'Kang — El Conquistador',mn:['Soldado Temporal','⏳'],pool:['B','A']},
+ {boss:'Dormammu',title:'Dormammu — Señor de la Dimensión Oscura',mn:['Zelote Oscuro','🔥'],pool:['B','A']},
+ {boss:'Ego',title:'Ego — El Planeta Viviente',mn:['Soberano Dorado','🛸'],pool:['A','S']},
+ {boss:'Thanos',title:'Thanos — El Titán Loco (Guantelete)',mn:['Chitauri','👾'],pool:['A','S']}];
+const TOWER_TOTAL=96;
+const phaseRange=p=>{const s=p===1?0:6+(p-2)*10;return[s,s+(p===1?6:10)]};
+function locate(g){if(g<6)return{p:1,i:g};g-=6;return{p:2+Math.floor(g/10),i:g%10}}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function towerM(g){return 1.2+g*.009}
+function towerFight(g){const{p,i}=locate(g);const ph=PH[p-1],n=p===1?6:10,boss=i===n-1,r=rng(g*977+13);
+ const m=towerM(g),abL=p===1?0:Math.min(5,1+Math.floor((p-2)/2));
+ const pat=['minions','minions','duel','squad','minions','duel','squad','duel','squad'];
+ let type=boss?'boss':pat[i],en=[];
+ const pool=ph.pool.flatMap(t=>TIER_LIST[t]).filter(x=>x!==ph.boss);
+ const pickCh=()=>pool.splice(Math.floor(r()*pool.length),1)[0];
+ const mn=()=>({k:'m',label:ph.mn[0],emoji:ph.mn[1],m});
+ const ch=(mul)=>({k:'c',name:pickCh(),lvl:1,abLvl:abL,mul:Object.assign({all:m},mul||{})});
+ let title;
+ if(type==='minions'){const c=g===0?1:g===1?2:Math.min(4,1+Math.ceil(p/3)+(i%2));for(let j=0;j<c;j++)en.push(mn());title=`${ph.mn[0]} ×${c}`}
+ else if(type==='duel'){en.push(ch());title='Duelo 1 vs 1'}
+ else if(type==='squad'){const c=Math.min(4,2+Math.floor(p/4));for(let j=0;j<c;j++)en.push(ch({all:m*.9}));title=`Escuadrón (${c})`}
+ else{const esc=p>=6?2:p>=3?1:0;for(let j=0;j<esc;j++)en.push(mn());
+  const th=p===10;en.push({k:'c',name:ph.boss,lvl:1,abLvl:th?5:Math.min(5,1+Math.floor(p/2)),mul:{all:m*1.05,hp:th?2.2:1.6,atk:th?1.15:1,label:ph.title,aura:th?'gold':''}});title='👑 JEFE: '+ph.title}
+ return{g,p,i,boss,type,title,enemies:en}}
+function buildEnemies(F){return F.enemies.map(s=>s.k==='m'?mkMin(s,s.m):mkF(s.name,s.lvl,s.abLvl,s.mul))}
+function towerReward(F){return{coins:Math.round((120+F.g*12)*(F.boss?3:1)),frags:(2+Math.floor((F.p-1)/2))*(F.boss?3:1),box:F.boss?3+(F.p>=5?1:0)+(F.p===10?1:0):0}}
+
+/* ===================== TORNEOS ===================== */
+const TDIF={easy:{label:'Fácil',n:4,cost:300,lv0:1,coin:60,fin:900,frag:15,packs:1,ic:'🥉'},normal:{label:'Normal',n:5,cost:600,lv0:2,coin:100,fin:2000,frag:35,packs:2,ic:'🥈'},hard:{label:'Difícil',n:6,cost:1000,lv0:3,coin:160,fin:4000,frag:70,packs:3,ic:'🥇'}};
+const RN={1:'Final',2:'Semifinal',3:'Cuartos de final',4:'Octavos de final',5:'16avos de final',6:'32avos de final'};
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function enemyTeam(diff,r){const lv=Math.min(10,TDIF[diff].lv0+r);return shuffle(NAMES).slice(0,5).map(n=>({n,lvl:lv}))}
+</script>
+
+<script id="ui">
+/* ===================== CONFIG SUPABASE ===================== */
+const SUPABASE_URL = "https://hynofqwufckwzupdwmil.supabase.co";
+const SUPABASE_KEY = "sb_publishable_X7x2BgntbsszPFanVOBH5w_2ExR6hog";
+// Autenticación solo con usuario+contraseña: internamente se usa el email sintético usuario@mcugacha.app.
+// IMPORTANTE en Supabase: Authentication → Providers → Email → desactiva "Confirm email".
+const CLOUD_OK=/^https:\/\/[a-z0-9]{15,25}\.supabase\.co\/?$/.test(SUPABASE_URL)&&typeof supabase!=='undefined';
+
+/* ===================== ESTADO ===================== */
+const $=s=>document.querySelector(s);
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let S=null,USER=null,sb=null,TAB='tower',CSUB='col',CFILTER='ALL',BSPEED=1,BSKIP=false,BABORT=false,saveT=null,NEXT=null,AUTHM='login';
+const KEY=u=>'mcu_gacha_'+(u||'local');
+const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{done:0},box:0,nextCoin:Date.now()+3600000,nextPack:Date.now()+8*3600000,tourn:null,sound:true,welcome:false,twins:0});
+function score(){let s=S.tower.done*100+S.twins*50;for(const n in S.col){const e=S.col[n];s+=20+e.lvl*10+e.ab*15}return s}
+function save(){if(!S)return;try{localStorage.setItem(KEY(USER&&USER.id),JSON.stringify(S))}catch(e){}if(sb&&USER){clearTimeout(saveT);saveT=setTimeout(cloudSave,2500)}}
+function setSync(t){const e=$('#sync');if(e)e.textContent=t}
+async function cloudSave(){if(!sb||!USER||!S)return;setSync('☁️ …');const{error}=await sb.from('players').upsert({id:USER.id,username:S.name,data:S,score:score(),tower_done:S.tower.done,updated_at:new Date().toISOString()});setSync(error?'⚠️ sin nube':'☁️ ok')}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)cloudSave()});
+function hdr(){$('#hCoins').textContent='🪙 '+S.coins;$('#hFrags').textContent='🧩 '+S.frags}
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2300)}
+
+/* ===================== SONIDO / FX ===================== */
+let AC=null;
+function snd(t){if(!S||!S.sound)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+ const P={hit:[[170,.07,'square']],crit:[[300,.07,'sawtooth'],[520,.1,'sawtooth']],heal:[[520,.09],[700,.11]],win:[[523,.12],[659,.12],[784,.22]],lose:[[300,.2,'triangle'],[200,.3,'triangle']],open:[[220,.12,'triangle'],[330,.12,'triangle']],flip:[[600,.08]],rare:[[523,.1],[659,.1],[784,.1],[1046,.3]]}[t]||[];
+ let x=AC.currentTime;P.forEach(([f,d,w])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=w||'sine';o.frequency.value=f;g.gain.setValueAtTime(.1,x);g.gain.exponentialRampToValueAtTime(.001,x+d);o.connect(g);g.connect(AC.destination);o.start(x);o.stop(x+d);x+=d*.9})}catch(e){}}
+function confetti(n){n=n||140;const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;z-index:95;pointer-events:none';c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);const x=c.getContext('2d');const cols=['#facc15','#ef4444','#3b82f6','#22c55e','#a855f7','#f97316'];
+ const P=[...Array(n)].map(()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.4,vx:(Math.random()-.5)*4,vy:2+Math.random()*4,s:5+Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[Math.random()*6|0]}));let t=0;
+ (function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.05;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});if(++t<220)requestAnimationFrame(f);else c.remove()})()}
+
+/* ===================== AUTH ===================== */
+function authMode(m){AUTHM=m;$('#tLogin').classList.toggle('on',m==='login');$('#tReg').classList.toggle('on',m==='reg');$('#aGo').textContent=m==='reg'?'Crear cuenta':'Entrar';$('#aMsg').textContent=''}
+async function authGo(){const msg=$('#aMsg'),raw=$('#aUser').value.trim(),pw=$('#aPass').value;
+ if(!CLOUD_OK)return msg.textContent='La nube no está disponible: usa el modo local.';
+ if(!/^[A-Za-z0-9_]{3,16}$/.test(raw))return msg.textContent='Usuario: 3-16 caracteres (letras, números o _).';
+ if(pw.length<6)return msg.textContent='La contraseña necesita mínimo 6 caracteres.';
+ const email=raw.toLowerCase()+'@mcugacha.app';msg.textContent='…';
+ if(AUTHM==='reg'){const{data,error}=await sb.auth.signUp({email,password:pw,options:{data:{username:raw}}});
+  if(error)return msg.textContent=/registered|exists/i.test(error.message)?'Ese usuario ya existe.':error.message;
+  if(!data.session)return msg.textContent='Cuenta creada, pero Supabase exige confirmar email: desactiva «Confirm email» en Authentication → Providers → Email.';
+  USER=data.user;S=defState();S.name=raw;await startApp()}
+ else{const{data,error}=await sb.auth.signInWithPassword({email,password:pw});if(error)return msg.textContent=/invalid/i.test(error.message)?'Usuario o contraseña incorrectos.':error.message;USER=data.user;await loadCloud();await startApp()}}
+async function loadCloud(){const{data}=await sb.from('players').select('data,username').eq('id',USER.id).maybeSingle();
+ if(data&&data.data)S=Object.assign(defState(),data.data);else{let l=null;try{l=JSON.parse(localStorage.getItem(KEY(USER.id)))}catch(e){}S=Object.assign(defState(),l||{});S.name=(USER.user_metadata&&USER.user_metadata.username)||S.name}}
+function playLocal(){const n=$('#lUser').value.trim();localStorage.setItem('mcu_mode','local');let l=null;try{l=JSON.parse(localStorage.getItem(KEY('local')))}catch(e){}S=Object.assign(defState(),l||{});if(n)S.name=n;startApp()}
+async function logout(){if(sb)await sb.auth.signOut();localStorage.removeItem('mcu_mode');location.reload()}
+
+/* ===================== ARRANQUE ===================== */
+async function boot(){
+ if(!CLOUD_OK){$('#authWarn').classList.remove('hidden');$('#authWarn').innerHTML='⚠️ <b>Supabase no está configurado correctamente</b>: la URL indicada no es la de un proyecto (parece la clave publishable). Cambia <code>SUPABASE_URL</code> por <code>https://TU-PROYECTO.supabase.co</code>. Mientras tanto puedes jugar en <b>modo local</b>.';$('#authTabs').classList.add('hidden')}
+ else{sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const{data}=await sb.auth.getSession();if(data.session){USER=data.session.user;await loadCloud();return startApp()}}
+ if(localStorage.getItem('mcu_mode')==='local'){let l=null;try{l=JSON.parse(localStorage.getItem(KEY('local')))}catch(e){}S=Object.assign(defState(),l||{});return startApp()}
+ $('#auth').classList.remove('hidden')}
+async function startApp(){$('#auth').classList.add('hidden');$('#app').classList.remove('hidden');S.tower=S.tower||{done:0};hdr();go('tower');setInterval(tickGifts,1000);
+ if(!S.welcome){S.welcome=true;save();await openPacks('welcome',1,'🎁 Sobre de bienvenida','🎁');render()}}
+
+/* ===================== NAVEGACIÓN ===================== */
+function go(t){TAB=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));render();$('#view').scrollTop=0}
+function render(){const v=$('#view');v.innerHTML={tower:vTower,tourn:vTourn,col:vCol,shop:vShop,set:vSet}[TAB]();if(TAB==='shop')tickGifts();if(TAB==='set')loadRanking()}
+function modal(h){$('#modalBody').innerHTML=h;const m=$('#modal');m.classList.remove('hidden');m.classList.add('flex')}
+function closeModal(){const m=$('#modal');m.classList.add('hidden');m.classList.remove('flex')}
+
+/* ===================== TARJETAS ===================== */
+function cardEl(n,o){o=o||{};const c=CH[n],t=TIERS[c.tier],e=S.col[n];const lvl=o.lvl||(e?e.lvl:1);const lock=!e&&!o.force;const s=stats(n,lvl);
+ if(o.mini)return`<div class="card ${c.tier}" style="--c:${t.color}"><div class="text-2xl text-center pt-1">${c.emoji}</div><div class="text-[9px] text-center truncate px-0.5 font-bold">${n}</div><div class="text-[9px] text-center text-slate-300">Nv${lvl}</div></div>`;
+ const star=e&&!o.force?(e.ab?'★'.repeat(e.ab)+'☆'.repeat(5-e.ab):'🔒'):'';
+ return`<div class="card ${c.tier} ${lock?'locked':''}" style="--c:${t.color}"><span class="tb" style="background:${t.color}">${c.tier}</span>${(e||o.force)&&!o.noLvl?`<span class="lb">Nv${lvl}</span>`:''}<div class="text-center text-4xl pt-6 pb-1">${c.emoji}</div><div class="text-[11px] font-black text-center truncate px-1">${n}</div><div class="flex justify-center gap-1.5 text-[10px] text-slate-300 py-0.5"><span>❤️${s.hp}</span><span>⚔️${s.atk}</span><span>🛡️${s.def}</span></div><div class="text-[10px] text-center text-amber-300 pb-1 h-4">${star}</div></div>`}
+
+/* ===================== COLECCIÓN ===================== */
+function setSub(s){CSUB=s;render()}function setFilter(f){CFILTER=f;render()}
+function vCol(){return`<div class="flex gap-2 mb-3"><button class="sub ${CSUB==='col'?'on':''}" onclick="setSub('col')">Mi Colección (${Object.keys(S.col).length}/47)</button><button class="sub ${CSUB==='team'?'on':''}" onclick="setSub('team')">Equipo Activo (${S.team.length}/5)</button></div>`+(CSUB==='col'?colGrid():teamView())}
+function colGrid(){const f=['ALL',...TIER_ORDER].map(t=>`<button class="chip ${CFILTER===t?'on':''}" onclick="setFilter('${t}')">${t==='ALL'?'Todos':TIERS[t].ic+' '+t}</button>`).join('');
+ const list=NAMES.filter(n=>CFILTER==='ALL'||CH[n].tier===CFILTER).sort((a,b)=>TIER_ORDER.indexOf(CH[b].tier)-TIER_ORDER.indexOf(CH[a].tier)||(S.col[b]?1:0)-(S.col[a]?1:0));
+ return`<div class="flex gap-1 flex-wrap mb-3">${f}</div><div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">${list.map(n=>`<div onclick="showChar('${n}')">${cardEl(n)}</div>`).join('')}</div>`}
+function pow(n){const e=S.col[n],s=stats(n,e.lvl);return Math.round((s.hp/4+s.atk*3+s.def*4)*(1+.1*e.ab))}
+function teamView(){const slots=[0,1,2,3,4].map(i=>S.team[i]?`<div onclick="rmTeam(${i})">${cardEl(S.team[i],{mini:1})}</div>`:`<div class="slot">+</div>`).join('');
+ const owned=Object.keys(S.col).sort((a,b)=>pow(b)-pow(a));const tp=S.team.reduce((a,n)=>a+pow(n),0);
+ return`<div class="panel mb-3"><div class="flex justify-between text-xs mb-2"><b>Orden de combate 1 → 5</b><span class="text-amber-300 font-black">⚡ Poder ${tp}</span></div><div class="grid grid-cols-5 gap-1.5">${slots}</div><div class="text-[10px] text-slate-400 mt-2">Toca un héroe del equipo para quitarlo. Se combate en orden.</div><button class="btn gray w-full mt-2 !py-2 !text-xs" onclick="autoTeam()">⚡ Auto-equipo (los 5 más fuertes)</button></div>
+ <div class="text-xs font-black mb-2 text-slate-400">TUS HÉROES — toca para añadir/quitar</div><div class="grid grid-cols-3 sm:grid-cols-4 gap-2">${owned.map(n=>`<div onclick="togTeam('${n}')" class="${S.team.includes(n)?'opacity-40':''}">${cardEl(n)}</div>`).join('')||'<div class="text-slate-500 text-sm">Aún no tienes héroes. ¡Abre sobres!</div>'}</div>`}
+function togTeam(n){const i=S.team.indexOf(n);if(i>=0)S.team.splice(i,1);else if(S.team.length<5)S.team.push(n);else return toast('Equipo completo (5)');save();render()}
+function rmTeam(i){S.team.splice(i,1);save();render()}
+function autoTeam(){S.team=Object.keys(S.col).sort((a,b)=>pow(b)-pow(a)).slice(0,5);save();render()}
+const lvCost=l=>({c:120*l,d:Math.ceil(l/2)});
+const abCost=a=>a===0?{f:10,c:0}:{f:5+5*a,c:250*a};
+function showChar(n){const c=CH[n],e=S.col[n],t=TIERS[c.tier];
+ if(!e)return modal(`<div class="flex justify-end"><button class="chip" onclick="closeModal()">✕</button></div><div class="w-44 mx-auto">${cardEl(n)}</div><div class="text-center mt-3 text-sm text-slate-400">🔒 Aún no lo tienes. Consíguelo en sobres.<br><b>${c.ab.name}</b>: ${c.ab.desc}</div>`);
+ const l=e.lvl,cur=stats(n,l),nx=stats(n,Math.min(10,l+1));const lc=lvCost(l),ac=abCost(e.ab);const A=e.ab;
+ const k=`daño ×${(1+.08*Math.max(0,A-1)).toFixed(2)} · curación +${2*Math.max(0,A-1)}% HP · buffs ×${(1+.05*Math.max(0,A-1)).toFixed(2)}`;
+ modal(`<div class="flex justify-between items-center"><div class="font-black" style="color:${t.color}">${t.ic} Tier ${c.tier} · ${c.type==='Hero'?'Héroe':'Villano'} · ${c.team}</div><button class="chip" onclick="closeModal()">✕</button></div>
+ <div class="w-40 mx-auto my-3">${cardEl(n)}</div>
+ <div class="grid grid-cols-3 gap-2 text-center text-sm mb-3">${['hp','atk','def'].map((s,i)=>`<div class="panel !p-2"><div class="text-[10px] text-slate-400">${['❤️ HP','⚔️ ATK','🛡️ DEF'][i]}</div><b>${cur[s]}</b>${l<10?`<div class="text-[10px] text-emerald-400">→ ${nx[s]}</div>`:''}</div>`).join('')}</div>
+ <div class="panel mb-3"><div class="font-black text-amber-300 text-sm">${c.ab.name} <span class="text-[10px] text-slate-400">(${{P:'Pasiva',fast:'Rápida',normal:'Normal',slow:'Lenta'}[c.ab.kind]})</span></div><div class="text-xs mt-1">${c.ab.desc}</div><div class="text-[11px] mt-2 ${A?'text-emerald-400':'text-red-400'}">${A?`Despertar Nv ${A}/5 — ${k}`:'🔒 Habilidad dormida: despiértala para usarla en combate'}</div></div>
+ <div class="text-xs text-slate-400 mb-2">Copias sobrantes: <b class="text-white">${e.dupes}</b></div>
+ <div class="grid grid-cols-2 gap-2">
+  <button class="btn" ${l>=10||S.coins<lc.c||e.dupes<lc.d?'disabled':''} onclick="levelUp('${n}')">⬆️ Nivel ${l}→${Math.min(10,l+1)}<br><span class="text-[10px] font-bold">${l>=10?'MÁX':`🪙${lc.c} + ${lc.d} copia(s)`}</span></button>
+  <button class="btn gold" ${A>=5||S.frags<ac.f||S.coins<ac.c?'disabled':''} onclick="awaken('${n}')">${A===0?'🌟 Despertar':'🌟 Hab. Nv '+A+'→'+Math.min(5,A+1)}<br><span class="text-[10px] font-bold">${A>=5?'MÁX':`🧩${ac.f}${ac.c?` + 🪙${ac.c}`:''}`}</span></button></div>
+ <button class="btn gray w-full mt-2" onclick="togTeam('${n}');showChar('${n}')">${S.team.includes(n)?'Quitar del equipo':'Añadir al equipo'}</button>`)}
+function levelUp(n){const e=S.col[n];if(e.lvl>=10)return;const c=lvCost(e.lvl);if(S.coins<c.c||e.dupes<c.d)return toast('Faltan recursos');S.coins-=c.c;e.dupes-=c.d;e.lvl++;save();hdr();snd('win');showChar(n);render()}
+function awaken(n){const e=S.col[n];if(e.ab>=5)return;const c=abCost(e.ab);if(S.frags<c.f||S.coins<c.c)return toast('Faltan recursos');S.frags-=c.f;S.coins-=c.c;e.ab++;save();hdr();snd('rare');confetti(60);showChar(n);render()}
+
+/* ===================== SOBRES ===================== */
+function grant(n){const e=S.col[n];if(e){e.dupes++;return false}S.col[n]={lvl:1,ab:0,dupes:0};if(S.team.length<5)S.team.push(n);return true}
+async function openPacks(kind,count,title,icon){const res=[];for(let i=0;i<count;i++){const n=drawCard(PROBS[kind]);res.push({n,isNew:grant(n)})}save();await packSeq(res,title,icon)}
+function packSeq(res,title,icon){return new Promise(done=>{
+ const ov=$('#packOv'),stg=$('#packStage'),hint=$('#packHint'),fl=$('#flash');ov.classList.remove('hidden');ov.classList.add('flex');
+ let skip=false,tapR=null;const tap=()=>new Promise(r=>{tapR=()=>{tapR=null;r()}});
+ $('#packSkip').onclick=e=>{e.stopPropagation();skip=true;tapR&&tapR()};ov.onclick=()=>{tapR&&tapR()};
+ (async()=>{
+  for(let i=0;i<res.length&&!skip;i++){const r=res[i],c=CH[r.n],col=TIERS[c.tier].color;
+   stg.innerHTML=`<div class="text-8xl packshake" style="filter:drop-shadow(0 0 20px ${col}77)">${icon}</div>`;hint.textContent=`${title} · ${i+1}/${res.length} — toca para abrir`;snd('open');
+   await tap();if(skip)break;
+   const p=stg.firstChild;p.style.animationDuration='.12s';p.style.filter=`drop-shadow(0 0 45px ${col})`;snd('open');await wait(750);if(skip)break;
+   fl.style.background=`radial-gradient(circle,${col} 0,transparent 70%)`;fl.classList.remove('flashgo');void fl.offsetWidth;fl.classList.add('flashgo');snd(c.tier==='S'||c.tier==='A'?'rare':'flip');
+   stg.innerHTML=`<div class="flipin mx-auto" style="width:190px">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}</div><div class="mt-3 font-black ${r.isNew?'text-emerald-400':'text-slate-300'}">${r.isNew?'✨ ¡NUEVO!':'Duplicado (+1 copia)'}</div>`;
+   if(c.tier==='S'||c.tier==='A')confetti(c.tier==='S'?180:80);hint.textContent=i<res.length-1?'Toca para continuar':'Toca para ver el resumen';
+   await tap()}
+  stg.innerHTML=`<div class="text-lg font-black mb-3">Resumen</div><div class="grid grid-cols-3 gap-2 w-[min(92vw,420px)] max-h-[60dvh] overflow-y-auto p-1">${res.map(r=>`<div class="relative">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}${r.isNew?'<div class="absolute -top-1 -right-1 text-[9px] font-black bg-emerald-500 text-black px-1.5 rounded-full z-10">NEW</div>':''}</div>`).join('')}</div><button id="pkOk" class="btn mt-4">Aceptar</button>`;hint.textContent='';
+  $('#pkOk').onclick=e=>{e.stopPropagation();ov.classList.add('hidden');ov.classList.remove('flex');ov.onclick=null;hdr();done()}})()})}
+
+/* ===================== TIENDA ===================== */
+const SHOP=[
+ {id:'basic',n:'Sobre Básico',ic:'📦',p:300,k:'basic',c:1,d:'1 carta · E 45% · D 30% · C 15% · B 7% · A 2.5% · S 0.5%'},
+ {id:'premium',n:'Sobre Premium',ic:'🎁',p:900,k:'premium',c:1,d:'1 carta · mejores probabilidades (S 1.5%)'},
+ {id:'chest1',n:'Cofre Básico',ic:'🧰',p:1000,k:'basic',c:0,d:'3 a 5 sobres básicos'},
+ {id:'chest2',n:'Cofre Premium',ic:'👑',p:2800,k:'premium',c:0,d:'3 a 5 sobres premium'}];
+function vShop(){return`<div class="text-center mb-3"><div class="text-xl font-black">🛒 Tienda</div></div><div id="gifts" class="grid grid-cols-2 gap-2 mb-4"></div>
+ <div class="text-xs font-black text-slate-400 mb-2">SOBRES Y COFRES</div><div class="space-y-2">${SHOP.map(s=>`<div class="panel flex items-center gap-3"><div class="text-4xl">${s.ic}</div><div class="flex-1"><div class="font-black text-sm">${s.n}</div><div class="text-[11px] text-slate-400">${s.d}</div></div><button class="btn gold !py-2" ${S.coins<s.p?'disabled':''} onclick="buy('${s.id}')">🪙 ${s.p}</button></div>`).join('')}</div>`}
+async function buy(id){const s=SHOP.find(x=>x.id===id);if(S.coins<s.p)return toast('Monedas insuficientes');S.coins-=s.p;hdr();const n=s.c||3+Math.floor(Math.random()*3);await openPacks(s.k,n,s.n,s.ic);render()}
+const fmt=ms=>{const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return`${h?h+'h ':''}${String(m).padStart(2,'0')}m ${String(s%60).padStart(2,'0')}s`};
+function tickGifts(){if(!S)return;const g=$('#gifts');if(!g)return;const now=Date.now();const c=S.nextCoin-now,p=S.nextPack-now;
+ g.innerHTML=`<div class="panel text-center"><div class="text-3xl">🪙</div><div class="text-xs font-black mt-1">Regalo de monedas</div><div class="text-[11px] text-slate-400 mb-2">+150 cada 1 h</div>${c<=0?`<button class="btn gold w-full !py-2" onclick="claimCoins()">¡Reclamar!</button>`:`<div class="text-sm font-black text-slate-300 py-2">⏳ ${fmt(c)}</div>`}</div>
+ <div class="panel text-center"><div class="text-3xl">🎁</div><div class="text-xs font-black mt-1">Sobre gratis</div><div class="text-[11px] text-slate-400 mb-2">Cada 8 h</div>${p<=0?`<button class="btn gold w-full !py-2" onclick="claimPack()">¡Abrir!</button>`:`<div class="text-sm font-black text-slate-300 py-2">⏳ ${fmt(p)}</div>`}</div>`}
+function claimCoins(){if(S.nextCoin>Date.now())return;S.coins+=150;S.nextCoin=Date.now()+3600000;save();hdr();snd('win');toast('+150 🪙');tickGifts()}
+async function claimPack(){if(S.nextPack>Date.now())return;S.nextPack=Date.now()+8*3600000;save();await openPacks('free',1,'Sobre gratis','🎁');render()}
+
+/* ===================== TORRE UI ===================== */
+function vTower(){const d=S.tower.done;let o=`<div class="text-center mb-3"><div class="text-xl font-black">🏰 Torre del Infinito</div><div class="text-xs text-slate-400">${d}/${TOWER_TOTAL} combates · Equipo ${S.team.length}/5</div></div>`;
+ if(S.box>0)o+=`<button class="btn gold w-full mb-3" onclick="openBox()">📦 Abrir Caja de Fase (${S.box} sobres)</button>`;
+ if(d>=TOWER_TOTAL)o+=`<div class="panel text-center mb-3">🏆 ¡Has completado las 10 fases!</div>`;
+ for(let p=1;p<=10;p++){const[a,b]=phaseRange(p),ph=PH[p-1],cleared=d>=b,cur=d>=a&&d<b;
+  o+=`<div class="panel mb-2 ${cur?'ring-2 ring-amber-400':''} ${d<a?'opacity-50':''}"><div class="flex justify-between items-center"><div><div class="font-black">Fase ${p} ${cleared?'✅':cur?'⚔️':'🔒'}</div><div class="text-[11px] text-slate-400">Jefe: ${ph.title}</div></div><div class="text-xs text-slate-300">${Math.min(Math.max(d-a,0),b-a)}/${b-a}</div></div>`;
+  if(cur){o+=`<div class="mt-2 grid grid-cols-5 gap-1.5">`;for(let g=a;g<b;g++){const F=towerFight(g),st=g<d?'done':g===d?'cur':'';o+=`<button class="fnode ${st} ${F.boss?'boss':''}" ${g===d?'onclick="towerPreview()"':''}>${g<d?'✓':F.boss?'👑':g-a+1}</button>`}o+='</div>'}
+  o+='</div>'}
+ return o}
+function enemyRows(list){return list.map(f=>`<div class="flex items-center gap-2 text-sm py-1"><span class="text-2xl">${f.emoji}</span><span class="flex-1 font-bold truncate">${f.label}</span><span class="text-[11px] text-slate-300">❤️${f.max} ⚔️${f.atk} 🛡️${f.def}</span></div>`).join('')}
+function towerPreview(){if(!S.team.length)return toast('Equipa al menos 1 héroe en Colección');const F=towerFight(S.tower.done),E=buildEnemies(F),rw=towerReward(F);
+ modal(`<div class="flex justify-between"><div class="font-black">Fase ${F.p} · Combate ${F.i+1}</div><button class="chip" onclick="closeModal()">✕</button></div><div class="text-sm text-amber-300 font-bold mb-2">${F.title}</div><div class="panel mb-3">${enemyRows(E)}</div>
+ <div class="text-xs text-slate-300 mb-3">Recompensa: 🪙${rw.coins} · 🧩${rw.frags}${F.boss?` · 📦 Caja de Fase (${rw.box} sobres)`:''}</div><div class="text-xs text-slate-400 mb-3">Tu equipo: ${S.team.map(n=>CH[n].emoji).join(' ')}</div><button class="btn red w-full" onclick="towerGo()">⚔️ ¡COMBATIR!</button>`)}
+async function towerGo(){const g=S.tower.done;if(g>=TOWER_TOTAL)return;if(!S.team.length)return toast('Equipa al menos 1 héroe en Colección');closeModal();const F=towerFight(g);
+ const A=S.team.map(n=>mkF(n,S.col[n].lvl,S.col[n].ab));const w=await runBattle(A,buildEnemies(F),`Fase ${F.p} · Combate ${F.i+1}`);
+ if(w==='A'){const rw=towerReward(F);S.tower.done++;S.coins+=rw.coins;S.frags+=rw.frags;if(rw.box)S.box+=rw.box;save();hdr();endBattle();confetti(F.boss?260:120);snd('win');
+  result(true,`<div class="text-sm">🪙 +${rw.coins} · 🧩 +${rw.frags}</div>${rw.box?`<div class="mt-2 font-black text-amber-300">¡Fase ${F.p} completada! 📦 Caja de Fase (${rw.box} sobres)</div>`:''}`,rw.box?'📦 Abrir caja':'Continuar',rw.box?()=>openBox():null)}
+ else{endBattle();snd('lose');result(false,'<div class="text-sm text-slate-300">Necesitas más héroes en el equipo (mín. 2-3), subirlos de nivel y despertar habilidades.</div>','Volver',null)}}
+async function openBox(){if(S.box<=0)return;const n=S.box;S.box=0;save();await openPacks('tower',n,'Caja de Fase','📦');render()}
+function result(win,html,btn,cb){NEXT=cb;modal(`<div class="text-center"><div class="text-5xl">${win?'🏆':'💀'}</div><div class="text-2xl font-black my-2 ${win?'text-amber-300':'text-red-400'}">${win?'¡VICTORIA!':'DERROTA'}</div>${html}<button class="btn w-full mt-4" onclick="resultNext()">${btn}</button></div>`)}
+function resultNext(){closeModal();const f=NEXT;NEXT=null;if(f)f();else render();render()}
+
+/* ===================== COMBATE UI ===================== */
+function stageHTML(f,hp,max,en,thr,s){return`<div class="fcard ${f.aura==='gold'?'aura-gold':''}" data-uid="${f.uid}" data-side="${f.side}"><div class="text-5xl leading-none">${f.emoji}</div><div class="text-xs font-black truncate mt-1">${f.label}</div><div class="hpbar"><i data-hp="${f.uid}" style="width:${hp/max*100}%"></i></div><div class="text-[10px]" data-hpt="${f.uid}">${hp}/${max}</div><div class="enbar"><i data-en="${f.uid}" style="width:${thr?Math.min(100,en/thr*100):0}%"></i></div><div class="text-[12px] h-4" data-stt="${f.uid}">${s||''}</div></div>`}
+const benchHTML=t=>t.map(f=>`<div class="bchip" data-b="${f.uid}" title="${f.label}">${f.emoji}<div class="hpbar sm"><i data-hp="${f.uid}" style="width:100%"></i></div></div>`).join('');
+const stageEl=f=>document.querySelector(`#st${f.side} [data-uid="${f.uid}"]`);
+function floatTxt(f,t,c){if(BSKIP)return;const el=stageEl(f);if(!el)return;const d=document.createElement('div');d.className='float '+c;d.textContent=t;el.appendChild(d);setTimeout(()=>d.remove(),1000)}
+function setHP(f,hp,max){document.querySelectorAll(`[data-hp="${f.uid}"]`).forEach(e=>e.style.width=Math.max(0,hp/max*100)+'%');document.querySelectorAll(`[data-hpt="${f.uid}"]`).forEach(e=>e.textContent=hp+'/'+max);if(hp<=0){const b=document.querySelector(`[data-b="${f.uid}"]`);if(b)b.classList.add('dead')}}
+function blog(t){const l=$('#bLog');l.innerHTML=(l.innerHTML+'<div>'+t+'</div>').split('</div>').slice(-4).join('</div>')}
+const bsl=ms=>BSKIP?Promise.resolve():wait(ms/BSPEED);
+function bSpeed(){BSPEED=BSPEED===1?2:BSPEED===2?4:1;$('#bSpd').textContent='x'+BSPEED}
+function bFlee(){if(confirm('¿Huir del combate? Contará como derrota.'))BABORT=true}
+async function handle(e){switch(e.k){
+ case'enter':{$('#st'+e.side).innerHTML=stageHTML(e.f,e.hp,e.max,e.en,e.thr,e.s);document.querySelectorAll(`#bench${e.side} .bchip`).forEach(b=>b.classList.toggle('act',b.dataset.b===e.f.uid));await bsl(300);break}
+ case'lunge':{const el=stageEl(e.f);if(el&&!BSKIP){el.classList.remove('lunge');void el.offsetWidth;el.classList.add('lunge')}await bsl(260);break}
+ case'skill':{floatTxt(e.f,'✨ '+e.txt,'sk');blog(`<b>${e.f.label}</b>: ${e.txt}`);await bsl(380);break}
+ case'dmg':{setHP(e.f,e.hp,e.max);floatTxt(e.f,(e.crit?'💥 ':'')+'-'+e.amt,e.crit?'crit':'dmg');const el=stageEl(e.f);
+  if(el&&!BSKIP){el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit')}
+  if(!BSKIP&&e.f.side==='A'&&(e.crit||e.amt>=e.max*.22)){const b=$('#battle');b.classList.remove('sshake');void b.offsetWidth;b.classList.add('sshake')}
+  snd(e.crit?'crit':'hit');await bsl(e.dot?160:260);break}
+ case'heal':{setHP(e.f,e.hp,e.max);floatTxt(e.f,'+'+e.amt,'heal');if(e.txt)blog(`<b>${e.f.label}</b>: ${e.txt}`);snd('heal');await bsl(240);break}
+ case'txt':{floatTxt(e.f,e.txt,'txt');await bsl(300);break}
+ case'hpset':{setHP(e.f,e.hp,e.max);break}
+ case'down':{const el=stageEl(e.f);if(el)el.classList.add('fall');blog(`💀 ${e.f.label} cae`);await bsl(350);break}
+ case'st':{const s=document.querySelector(`#st${e.f.side} [data-stt="${e.f.uid}"]`);if(s)s.textContent=e.s;const n=document.querySelector(`#st${e.f.side} [data-en="${e.f.uid}"]`);if(n)n.style.width=(e.thr?Math.min(100,e.en/e.thr*100):0)+'%';break}}}
+async function play(evs){for(const e of evs)await handle(e)}
+async function runBattle(a,b,title){BSKIP=false;BABORT=false;const B=new Battle(a,b);const ov=$('#battle');ov.classList.remove('hidden');ov.classList.add('flex');
+ $('#bTitle').textContent=title;$('#bLog').innerHTML='';$('#benchA').innerHTML=benchHTML(a);$('#benchB').innerHTML=benchHTML(b);$('#stA').innerHTML='';$('#stB').innerHTML='';$('#bSpd').textContent='x'+BSPEED;
+ await play(B.ev);B.ev=[];
+ while(!B.over&&!BABORT){B.step();await play(B.ev);B.ev=[];await bsl(120)}
+ if(BABORT)B.winner='B';return B.winner}
+function endBattle(){const ov=$('#battle');ov.classList.add('hidden');ov.classList.remove('flex')}
+
+/* ===================== TORNEOS UI ===================== */
+function vTourn(){const t=S.tourn;
+ if(!t)return`<div class="text-center mb-3"><div class="text-xl font-black">🏆 Torneos Draft</div><div class="text-xs text-slate-400">Elige 5 luchadores, roba rivales y sube de nivel</div></div><div class="space-y-2">${Object.entries(TDIF).map(([k,d])=>`<div class="panel flex items-center gap-3"><div class="text-4xl">${d.ic}</div><div class="flex-1"><div class="font-black">${d.label} · desde ${RN[d.n]}</div><div class="text-[11px] text-slate-400">${d.n} combates (desde ${RN[d.n]}) · Premio final 🪙${d.fin} + 🧩${d.frag} + ${d.packs} sobre(s)</div></div><button class="btn gold !py-2" ${S.coins<d.cost?'disabled':''} onclick="tStart('${k}')">🪙 ${d.cost}</button></div>`).join('')}</div><div class="text-[11px] text-slate-500 mt-3">Usa luchadores del roster completo (no necesitas tenerlos). El progreso se guarda y puedes reanudarlo.</div>`;
+ const d=TDIF[t.diff],rn=RN[d.n-t.r];const row=(tm,fn)=>`<div class="grid grid-cols-5 gap-1.5">${tm.map((x,i)=>`<div ${fn?`onclick="${fn}(${i})"`:''}>${cardEl(x.n,{mini:1,lvl:x.lvl})}</div>`).join('')}</div>`;
+ const head=`<div class="flex justify-between items-center mb-3"><div><div class="font-black">${d.ic} Torneo ${d.label}</div><div class="text-[11px] text-slate-400">${t.stage==='champ'||t.stage==='out'?'Finalizado':rn+' · '+(t.r+1)+'/'+d.n}</div></div><button class="chip" onclick="tQuit()">Abandonar</button></div>`;
+ if(t.stage==='draft')return head+`<div class="panel mb-3"><div class="text-xs font-black mb-2">Tu plantilla (${t.team.length}/5)</div>${t.team.length?row(t.team):'<div class="slot">+</div>'}</div><div class="text-sm font-black mb-2 text-center">Elige tu héroe ${t.team.length+1}/5</div><div class="grid grid-cols-3 gap-2">${t.opts.map(n=>`<div onclick="tPick('${n}')">${cardEl(n,{force:1,lvl:1,noLvl:1})}</div>`).join('')}</div>`;
+ if(t.stage==='ready')return head+`<div class="panel mb-3"><div class="text-xs font-black mb-2">Tu equipo</div>${row(t.team)}</div><div class="panel mb-3"><div class="text-xs font-black mb-2 text-red-400">Rival</div>${row(t.enemy)}</div><button class="btn red w-full" onclick="tFight()">⚔️ ¡Luchar ${rn}!</button>`;
+ if(t.stage==='steal')return head+(t.sel==null?`<div class="text-center font-black mb-1">🎯 ¡Victoria! Roba un luchador rival</div><div class="text-[11px] text-slate-400 text-center mb-2">Conserva su nivel actual</div><div class="grid grid-cols-5 gap-1.5 mb-3">${t.enemy.map((x,i)=>`<div onclick="tSel(${i})" class="${t.team.some(y=>y.n===x.n)?'opacity-30':''}">${cardEl(x.n,{mini:1,lvl:x.lvl})}</div>`).join('')}</div><button class="btn gray w-full" onclick="tSkipSteal()">Saltar</button>`:`<div class="text-center font-black mb-2">¿A quién sustituye ${CH[t.enemy[t.sel].n].emoji} ${t.enemy[t.sel].n}?</div>${row(t.team,'tSwap')}<button class="btn gray w-full mt-3" onclick="tSel(null)">Atrás</button>`);
+ if(t.stage==='lvl')return head+`<div class="text-center font-black mb-2">⬆️ Sube +1 nivel a un héroe</div>${row(t.team,'tLvl')}`;
+ if(t.stage==='champ')return head+`<div class="panel text-center"><div class="text-5xl">🏆</div><div class="text-xl font-black text-amber-300 my-2">¡CAMPEÓN!</div><div class="text-sm">🪙${d.fin} · 🧩${d.frag} · ${d.packs} sobre(s)</div><button class="btn w-full mt-3" onclick="tQuit(1)">Cerrar torneo</button></div>`;
+ return head+`<div class="panel text-center"><div class="text-5xl">💀</div><div class="text-xl font-black text-red-400 my-2">Eliminado en ${RN[d.n-t.r]}</div><button class="btn w-full mt-3" onclick="tQuit(1)">Cerrar torneo</button></div>`}
+function tOpts(){const t=S.tourn,taken=t.team.map(x=>x.n);t.opts=shuffle(NAMES.filter(n=>!taken.includes(n))).slice(0,3)}
+function tStart(k){const d=TDIF[k];if(S.coins<d.cost)return toast('Monedas insuficientes');S.coins-=d.cost;S.tourn={diff:k,r:0,stage:'draft',team:[],opts:[],enemy:null,sel:null};tOpts();save();hdr();render()}
+function tPick(n){const t=S.tourn;t.team.push({n,lvl:1});if(t.team.length>=5){t.stage='ready';t.enemy=enemyTeam(t.diff,0)}else tOpts();save();render()}
+function tQuit(done){if(!done&&!confirm('¿Abandonar el torneo? Perderás la inscripción.'))return;S.tourn=null;save();render()}
+async function tFight(){const t=S.tourn,d=TDIF[t.diff];const A=t.team.map(x=>mkF(x.n,x.lvl,abOf(x.lvl))),E=t.enemy.map(x=>mkF(x.n,x.lvl,abOf(x.lvl)));
+ const w=await runBattle(A,E,`${RN[d.n-t.r]} (${t.r+1}/${d.n})`);endBattle();
+ if(w==='A'){S.twins++;S.coins+=d.coin*(t.r+1);hdr();confetti(120);snd('win');
+  if(t.r>=d.n-1){t.stage='champ';S.coins+=d.fin;S.frags+=d.frag;save();hdr();confetti(300);render();await openPacks('basic',d.packs,'Premio del torneo','🏆');render()}
+  else{t.stage='steal';t.sel=null;save();toast('¡Victoria! +'+d.coin*(t.r+1)+' 🪙');render()}}
+ else{const c=Math.round(d.coin*t.r/2);S.coins+=c;t.stage='out';save();hdr();snd('lose');toast('Derrota'+(c?' · consuelo +'+c+' 🪙':''));render()}}
+function tSel(i){const t=S.tourn;if(i!=null&&t.team.some(y=>y.n===t.enemy[i].n))return toast('Ya tienes a ese luchador');t.sel=i;render()}
+function tSwap(i){const t=S.tourn,x=t.enemy[t.sel];t.team[i]={n:x.n,lvl:x.lvl};t.stage='lvl';t.sel=null;save();render()}
+function tSkipSteal(){S.tourn.stage='lvl';save();render()}
+function tLvl(i){const t=S.tourn;if(t.team[i].lvl>=10)return toast('Ya está al máximo');t.team[i].lvl++;t.r++;t.stage='ready';t.enemy=enemyTeam(t.diff,t.r);save();render()}
+
+/* ===================== AJUSTES / RANKING ===================== */
+function vSet(){return`<div class="text-center mb-3"><div class="text-xl font-black">⚙️ Ajustes & Ranking</div></div>
+ <div class="panel mb-3"><div class="font-black text-sm mb-2">🌍 Ranking global</div><div id="rank" class="text-sm text-slate-400">Cargando…</div></div>
+ <div class="panel mb-3 space-y-2"><div class="font-black text-sm">👤 Sesión</div><div class="text-xs text-slate-300">${S.name} · ${USER?'Cuenta en la nube':'Modo local (sin nube)'}</div><div class="text-xs text-slate-400">Puntuación: <b class="text-amber-300">${score()}</b></div>
+  ${USER?`<button class="btn gray w-full !py-2" onclick="cloudSave().then(()=>toast('Guardado en la nube'))">☁️ Guardar ahora</button>`:''}<button class="btn red w-full !py-2" onclick="logout()">Cerrar sesión</button></div>
+ <div class="panel mb-3"><div class="font-black text-sm mb-2">🔊 Sonido</div><button class="btn ${S.sound?'':'gray'} w-full !py-2" onclick="S.sound=!S.sound;save();render()">${S.sound?'Sonido activado':'Sonido desactivado'}</button></div>
+ <div class="panel"><div class="font-black text-sm mb-2">🗑️ Datos</div><button class="btn red w-full !py-2 font-black" onclick="deleteAccount(event)">🗑️ Eliminar partida</button><div class="text-[10px] text-slate-500 mt-3">Proyecto de fans sin ánimo de lucro, no afiliado a Marvel ni Disney.</div></div>`}
+async function loadRanking(){const el=$('#rank');if(!el)return;if(!sb){el.innerHTML=`<div>Ranking solo disponible con cuenta en la nube.</div><div class="mt-1 text-amber-300 font-bold">Tu puntuación local: ${score()}</div>`;return}
+ const{data,error}=await sb.from('ranking').select('username,score,tower_done').order('score',{ascending:false}).limit(50);if(!$('#rank'))return;
+ if(error||!data)return el.textContent='No se pudo cargar el ranking (¿ejecutaste el SQL de configuración?).';
+ el.innerHTML=data.length?data.map((r,i)=>`<div class="flex items-center gap-2 py-1 border-b border-slate-800 ${r.username===S.name?'text-amber-300 font-black':''}"><span class="w-6">${['🥇','🥈','🥉'][i]||i+1}</span><span class="flex-1 truncate">${r.username||'?'}</span><span class="text-[11px] text-slate-400">🏰${r.tower_done}</span><span class="font-black">${r.score}</span></div>`).join(''):'Aún no hay jugadores.'}
+let DELETING=false;
+async function deleteAccount(e){
+  if(e) { e.preventDefault(); e.stopPropagation(); }
+  if(DELETING) return; DELETING=true;
+
+  // Diálogo de confirmación de seguridad
+  const confirmacion = confirm("⚠️ ¿ESTÁS SEGURO?\n\nEsta acción eliminará tu partida y todo tu progreso de forma permanente. ¿Quieres continuar?");
+  if (!confirmacion) { DELETING=false; return; }
+
+  // Evitar que un guardado pendiente vuelva a escribir datos
+  clearTimeout(saveT);
+
+  // 1. Limpiar almacenamiento local (tanto modo local como datos en caché)
+  localStorage.removeItem(KEY('local'));
+  localStorage.removeItem('mcu_mode');
+  if (typeof USER !== 'undefined' && USER) {
+    localStorage.removeItem(KEY(USER.id));
+    // 2. Si hay cuenta en la nube, borrar la fila en Supabase
+    if (typeof sb !== 'undefined' && sb) {
+      try {
+        const { error } = await sb.from('players').delete().eq('id', USER.id);
+        if (error) console.error("Error borrando en Supabase:", error);
+        await sb.auth.signOut();
+      } catch(err) { console.error("Error borrando en Supabase:", err); }
+    }
+  }
+  S = null; // bloquea cualquier guardado posterior
+
+  // 3. Recargar la aplicación para volver al menú de Inicio / Modo Local limpio
+  location.reload();
+}
+
+boot();
+</script>
+</body>
+</html>
