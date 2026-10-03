@@ -424,7 +424,8 @@ function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.i
 function towerM(g){return 1.2+g*.009}
 const cpow=n=>CH[n].hp/4+CH[n].atk*3+CH[n].def*4;
 const REFPW=NAMES.reduce((a,n)=>a+cpow(n),0)/NAMES.length;
-const TW={nv:.7,wp:.6,sq:[1,.8,.55],ms:{2:.85,3:.7,4:.6,5:.55},esc:.45,du:.7,bh:[1.6,1.6,1.6,1.6,1,1,1,1,1,1.6],bs:[1.4,1.1,1.7,.9,.7,.5,.5,.4,.6,.45]};
+/* Duelo Élite: multiplicadores de HP/ATK por fase (moderados en 3, muy altos en 10) */
+const TW={hy:[.6,.6],eh:[1,1,1.5,1.9,2.3,2.8,3.3,3.8,4.4,5],ea:[1,1,1.2,1.3,1.4,1.5,1.65,1.8,1.9,2],nv:.7,wp:.6,sq:[1,.8,.55],ms:{2:.85,3:.7,4:.6,5:.55},esc:.45,du:[.7,.7,1.3,1.1,1.05,.8,.8,.7,.5,.4],bh:[1.6,1.6,1.6,1.6,1,1,1,1,1,1.6],bs:[1.4,1.1,1.7,.9,.7,.5,.5,.4,.6,.45]};
 const rint=(r,a,b)=>a+Math.floor(r()*(b-a+1));
 /* Tipo de combate de cada piso (el último de cada fase es siempre el jefe). multi = batalla múltiple (2v2…5v5 según la fase) */
 const PAT={
@@ -443,16 +444,17 @@ function towerFight(g){const{p,i}=locate(g);const ph=PH[p-1],r=rng(g*977+13),typ
  const m=towerM(g),abL=p===1?0:Math.min(5,1+Math.floor((p-2)/2)),K=FMT(p);
  const pool=ph.pool.flatMap(t=>TIER_LIST[t]).filter(x=>x!==ph.boss);
  const pick=()=>pool.splice(Math.floor(r()*pool.length),1)[0];
- const mn=o=>Object.assign({k:'m',label:ph.mn[0],emoji:ph.mn[1],m,hp:1,atk:1},o||{});
+ const pf=p===1?TW.hy:[1,1];/* Fase 1: esbirros de Hydra más débiles */
+ const mn=o=>{const s=Object.assign({k:'m',label:ph.mn[0],emoji:ph.mn[1],m,hp:1,atk:1},o||{});s.hp*=pf[0];s.atk*=pf[1];return s};
  const elite=()=>mn({label:'Élite '+ph.mn[0],hp:1.5,atk:1.25});
  const hero=mul=>{const name=pick(),o=Object.assign({all:m},mul||{});o.all*=Math.pow(REFPW/cpow(name),TW.nv);/* iguala la potencia base de los rivales para que ninguno sea un muro */return{k:'c',name,lvl:1,abLvl:abL,mul:o}};
  let en=[],title,k=1;
  if(type==='minions'){/* oleada: P1-3 → 2-4 · P4-6 → 4-6 · P7-10 → 6-10 */
-  const c=g===0?2:g===1?3:p<=3?rint(r,2,4):p<=6?rint(r,4,6):rint(r,p-1,p);
+  const c=g===0?1:g===1?3:p<=3?rint(r,2,4):p<=6?rint(r,4,6):rint(r,p-1,p);
   const wf=Math.min(1,Math.pow(4/c,TW.wp));
-  for(let j=0;j<c;j++)en.push(mn({hp:wf,atk:Math.sqrt(wf)}));title=`${ph.mn[0]} ×${c}`}
- else if(type==='duel'){const c=hero({all:m*TW.du}),el=p>=3;
-  if(el){c.mul.hp=1.5+(p-3)*.1;c.mul.atk=1.2+(p-3)*.2/7;c.mul.label='Élite '+c.name}
+  for(let j=0;j<c;j++)en.push(mn({hp:wf,atk:Math.sqrt(wf)}));title=c>1?`${ph.mn[0]} ×${c}`:ph.mn[0]}
+ else if(type==='duel'){const c=hero({all:m*(Array.isArray(TW.du)?TW.du[p-1]:TW.du)}),el=p>=3;
+  if(el){c.mul.hp=TW.eh[p-1];c.mul.atk=TW.ea[p-1];c.mul.label='Élite '+c.name}
   en.push(c);title=el?'Duelo Élite 1 vs 1':'Duelo 1 vs 1'}
  else if(type==='squad'){/* escuadrón: P1-3 → 2-3 · P4-6 → 3-4 · P7-10 → 5 */
   const c=p<=3?rint(r,2,3):p<=6?rint(r,3,4):5,sm=c>=5?TW.sq[2]:c===4?TW.sq[1]:TW.sq[0];
@@ -468,7 +470,8 @@ function towerFight(g){const{p,i}=locate(g);const ph=PH[p-1],r=rng(g*977+13),typ
   title='👑 JEFE: '+ph.title+(esc?` + escolta ×${esc}`:'')}
  return{g,p,i,boss,type,k,title,enemies:en}}
 function buildEnemies(F){return F.enemies.map(s=>s.k==='m'?mkMin(s,s.m):mkF(s.name,s.lvl,s.abLvl,s.mul))}
-function towerReward(F){return{coins:Math.round((120+F.g*12)*(F.boss?3:1)),frags:(2+Math.floor((F.p-1)/2))*(F.boss?3:1),box:F.boss?3+(F.p>=5?1:0)+(F.p===10?1:0):0}}
+function towerReward(F){/* monedas: ~100 por combate normal y ~1000 por jefe (±15 %, fijo por piso para que el aviso previo coincida con lo cobrado) */
+ const v=.85+.3*rng(F.g*131+7)();return{coins:Math.round((F.boss?1000:100)*v),frags:(2+Math.floor((F.p-1)/2))*(F.boss?3:1),box:F.boss?3+(F.p>=5?1:0)+(F.p===10?1:0):0}}
 
 /* ===================== TORNEOS ===================== */
 const TDIF={easy:{label:'Fácil',n:4,cost:300,lv0:1,coin:60,fin:900,frag:15,packs:1,ic:'🥉'},normal:{label:'Normal',n:5,cost:600,lv0:2,coin:100,fin:2000,frag:35,packs:2,ic:'🥈'},hard:{label:'Difícil',n:6,cost:1000,lv0:3,coin:160,fin:4000,frag:70,packs:3,ic:'🥇'}};
