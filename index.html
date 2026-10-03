@@ -362,7 +362,7 @@ TIER_ORDER.forEach(t=>TIER_LIST[t].forEach(n=>CH[n].tier=t));
 const NAMES=Object.keys(CH);
 const stAt=(b,l)=>Math.round(b*(1+(l-1)*0.04));
 const stats=(n,l)=>({hp:stAt(CH[n].hp,l),atk:stAt(CH[n].atk,l),def:stAt(CH[n].def,l)});
-const abOf=l=>Math.max(1,Math.ceil(l/2));
+const abOf=l=>Math.min(5,Math.max(1,l));
 
 /* ===================== PROBABILIDADES ===================== */
 const PROBS={
@@ -663,7 +663,7 @@ function towerReward(F){/* monedas: ~100 por combate normal y ~1000 por jefe (±
  const v=.85+.3*rng(F.g*131+7)();return{coins:Math.round((F.boss?1000:100)*v),frags:(2+Math.floor((F.p-1)/2))*(F.boss?3:1),box:F.boss?3+(F.p>=5?1:0)+(F.p===10?1:0):0}}
 
 /* ===================== TORNEOS ===================== */
-const TDIF={free:{label:'Desafío Gratuito',title:'Desafío Gratuito',n:5,cost:0,lv0:1,ic:'🎟️',prize:'200 🪙 monedas'},easy:{label:'Fácil',n:4,cost:300,lv0:1,ic:'🥉',prize:'2 Sobres Básicos'},normal:{label:'Normal',n:5,cost:600,lv0:1,ic:'🥈',prize:'4 Sobres Básicos'},hard:{label:'Difícil',n:6,cost:1000,lv0:2,lv:[2,3,4,5,6,6],ic:'🥇',prize:'1 Cofre de Torneo Especial (3-5 cartas)'}};
+const TDIF={free:{label:'Desafío Gratuito',title:'Desafío Gratuito',n:5,cost:0,lv0:2,lv:[2,2,3,4,5],ic:'🎟️',prize:'200 🪙 monedas'},easy:{label:'Fácil',n:4,cost:300,lv0:1,ic:'🥉',prize:'2 Sobres Básicos'},normal:{label:'Normal',n:5,cost:600,lv0:2,lv:[2,2,3,4,5],ic:'🥈',prize:'4 Sobres Básicos'},hard:{label:'Difícil',n:6,cost:1000,lv0:2,lv:[2,3,5,6,7,7],ic:'🥇',prize:'1 Cofre de Torneo Especial (3-5 cartas)'}};
 const RN={1:'Final',2:'Semifinal',3:'Cuartos de final',4:'Octavos de final',5:'16avos de final',6:'32avos de final'};
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function enemyTeam(diff,r){const D=TDIF[diff],lv=D.lv?D.lv[r]:Math.min(10,D.lv0+r);return shuffle(NAMES).slice(0,5).map(n=>({n,lvl:lv}))}
@@ -905,7 +905,7 @@ function vTourn(){const t=S.tourn;
  if(t.stage==='draft')return head+`<div class="panel mb-3"><div class="text-xs font-black mb-2">Tu plantilla (${t.team.length}/5)</div>${t.team.length?row(t.team):'<div class="slot">+</div>'}</div><div class="text-sm font-black mb-2 text-center">Elige tu héroe ${t.team.length+1}/5</div><div class="grid grid-cols-3 gap-2">${t.opts.map(n=>`<div onclick="tPick('${n}')">${cardEl(n,{force:1,lvl:1,noLvl:1})}</div>`).join('')}</div>`;
  if(t.stage==='ready')return head+`<div class="panel mb-3"><div class="text-xs font-black mb-1">Tu equipo · orden de combate 1 → 5</div><div class="text-[10px] text-slate-400 mb-2">Toca un héroe y luego otro para intercambiar sus posiciones.</div><div class="grid grid-cols-5 gap-1.5">${t.team.map((x,i)=>`<div class="relative rounded-2xl ${t.ord===i?'ring-2 ring-amber-400':''}" onclick="tReorder(${i})"><div class="absolute -top-1 -left-1 z-10 text-[10px] font-black bg-amber-400 text-black rounded-full w-4 h-4 flex items-center justify-center">${i+1}</div>${cardEl(x.n,{mini:1,lvl:x.lvl})}</div>`).join('')}</div></div><div class="panel mb-3"><div class="text-xs font-black mb-2 text-red-400">Rival</div>${row(t.enemy)}</div><button class="btn red w-full" onclick="tFight()">⚔️ ¡Luchar ${rn}!</button>`;
  if(t.stage==='steal')return head+(t.sel==null?`<div class="text-center font-black mb-1">🎯 ¡Victoria! Roba un luchador rival</div><div class="text-[11px] text-slate-400 text-center mb-2">Conserva su nivel actual</div><div class="grid grid-cols-5 gap-1.5 mb-3">${t.enemy.map((x,i)=>`<div onclick="tSel(${i})" class="${t.team.some(y=>y.n===x.n)?'opacity-30':''}">${cardEl(x.n,{mini:1,lvl:x.lvl})}</div>`).join('')}</div><button class="btn gray w-full" onclick="tSkipSteal()">Saltar</button>`:`<div class="text-center font-black mb-2">¿A quién sustituye ${CH[t.enemy[t.sel].n].emoji} ${t.enemy[t.sel].n}?</div>${row(t.team,'tSwap')}<button class="btn gray w-full mt-3" onclick="tSel(null)">Atrás</button>`);
- if(t.stage==='lvl')return head+`<div class="text-center font-black mb-2">⬆️ Sube +1 nivel a un héroe</div>${row(t.team,'tLvl')}`;
+ if(t.stage==='lvl')return head+`<div class="text-center font-black mb-1">⬆️ Reparte ${t.pts||3} nivel${(t.pts||3)>1?'es':''} entre tus héroes</div><div class="text-[11px] text-slate-400 text-center mb-2">Puedes subir varias veces al mismo héroe (máx. nivel 10)</div>${row(t.team,'tLvl')}`;
  if(t.stage==='champ')return head+`<div class="panel text-center"><div class="text-5xl">🏆</div><div class="text-xl font-black text-amber-300 my-2">¡CAMPEÓN!</div><div class="text-sm">Premio: ${d.prize}</div><button class="btn w-full mt-3" onclick="tQuit(1)">Cerrar torneo</button></div>`;
  return head+`<div class="panel text-center"><div class="text-5xl">💀</div><div class="text-xl font-black text-red-400 my-2">Eliminado en ${RN[d.n-t.r]}</div><button class="btn w-full mt-3" onclick="tQuit(1)">Cerrar torneo</button></div>`}
 function tOpts(){const t=S.tourn,taken=t.team.map(x=>x.n);t.opts=shuffle(NAMES.filter(n=>!taken.includes(n))).slice(0,3)}
@@ -923,9 +923,10 @@ async function tFight(){const t=S.tourn,d=TDIF[t.diff];t.ord=null;const A=t.team
  else{t.stage='out';save();snd('lose');toast('Derrota');render()}}
 function tReorder(i){const t=S.tourn;if(t.ord==null)t.ord=i;else if(t.ord===i)t.ord=null;else{[t.team[t.ord],t.team[i]]=[t.team[i],t.team[t.ord]];t.ord=null}save();render()}
 function tSel(i){const t=S.tourn;if(i!=null&&t.team.some(y=>y.n===t.enemy[i].n))return toast('Ya tienes a ese luchador');t.sel=i;render()}
-function tSwap(i){const t=S.tourn,x=t.enemy[t.sel];t.team[i]={n:x.n,lvl:x.lvl};t.stage='lvl';t.sel=null;save();render()}
-function tSkipSteal(){S.tourn.stage='lvl';save();render()}
-function tLvl(i){const t=S.tourn;if(t.team[i].lvl>=10)return toast('Ya está al máximo');t.team[i].lvl++;t.r++;t.stage='ready';t.enemy=enemyTeam(t.diff,t.r);save();render()}
+function tSwap(i){const t=S.tourn,x=t.enemy[t.sel];t.team[i]={n:x.n,lvl:x.lvl};t.stage='lvl';t.pts=3;t.sel=null;save();render()}
+function tSkipSteal(){S.tourn.stage='lvl';S.tourn.pts=3;save();render()}
+function tLvl(i){const t=S.tourn;if(t.team[i].lvl>=10)return toast('Ya está al máximo');t.team[i].lvl++;t.pts=(t.pts||3)-1;
+ if(t.pts<=0||t.team.every(x=>x.lvl>=10)){t.pts=null;t.r++;t.stage='ready';t.enemy=enemyTeam(t.diff,t.r)}save();render()}
 
 /* ===================== AJUSTES / RANKING ===================== */
 function vSet(){return`<div class="text-center mb-3"><div class="text-xl font-black">⚙️ Ajustes & Ranking</div></div>
