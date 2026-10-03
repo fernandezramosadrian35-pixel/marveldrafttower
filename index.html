@@ -115,6 +115,35 @@ nav button.gift::after{content:"";position:absolute;top:5px;left:calc(50% + 8px)
 @keyframes toast{0%{opacity:0;top:0}10%,85%{opacity:1;top:14px}100%{opacity:0}}
 input{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;color:#fff;width:100%;font-size:14px;user-select:text}
 .hidden{display:none!important}
+
+.tw-head{position:sticky;top:-12px;z-index:20;margin:-12px -12px 0;padding:10px 12px;background:linear-gradient(#0b1226f5,#0b1226cc);backdrop-filter:blur(6px);border-bottom:1px solid #1e293b}
+.tmap{position:relative;border-radius:16px;overflow:hidden;margin-top:10px;border:1px solid #1e293b;box-shadow:inset 0 0 60px #000a}
+.tz{position:absolute;left:0;right:0;pointer-events:none;overflow:hidden}
+.tz-wm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:150px;opacity:.07;filter:blur(1px)}
+.tz-rib{position:absolute;left:8px;right:8px;z-index:3;text-align:center;font-size:12px;font-weight:900;padding:7px 8px;border-radius:12px;color:#fff;background:linear-gradient(90deg,transparent,#000b 15%,#000b 85%,transparent);border-top:1px solid var(--g);border-bottom:1px solid var(--g);text-shadow:0 0 8px var(--g)}
+.tz-rib span{color:var(--g);margin-right:2px}.tz-rib.lock{opacity:.6}
+.tsvg{position:absolute;left:0;top:0;width:100%;z-index:1;pointer-events:none}
+.tsvg path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.tsvg .pl{stroke:#94a3b866;stroke-width:4;stroke-dasharray:2 10}
+.tsvg .pd{stroke:#4ade80;stroke-width:5;filter:drop-shadow(0 0 4px #22c55e)}
+.tnode{position:absolute;z-index:4;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border:3px solid #475569;background:radial-gradient(circle at 35% 30%,#1e293b,#0b1020);color:#94a3b8;box-shadow:0 4px 10px #0009}
+.tnode .ty{position:absolute;right:-6px;bottom:-5px;font-style:normal;font-size:13px;background:#0b1020;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:1px solid #334155}
+.tnode.lock{opacity:.55;font-size:15px}
+.tnode.done{background:radial-gradient(circle at 35% 30%,#16a34a,#14532d);border-color:#4ade80;color:#dcfce7;box-shadow:0 0 12px #22c55e88}
+.tnode.cur{width:64px;height:64px;background:radial-gradient(circle at 35% 30%,#f59e0b,#78350f);border-color:#fde047;color:#fff;font-size:22px;animation:curpulse 1.2s ease-in-out infinite}
+.tnode .you{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-style:normal;font-size:10px;font-weight:900;color:#fde047;background:#000b;padding:1px 6px;border-radius:8px;white-space:nowrap;animation:youbob 1s ease-in-out infinite}
+.tnode.boss{width:88px;height:88px;flex-direction:column;border-width:4px;border-radius:26px;transform:translate(-50%,-50%) rotate(0);background:radial-gradient(circle at 35% 25%,#7f1d1d,#2a0505);border-color:#ef4444;color:#fecaca;box-shadow:0 0 20px #ef4444aa,0 6px 14px #000a}
+.tnode.boss.crown{background:radial-gradient(circle at 35% 25%,#a16207,#451a03);border-color:#facc15;color:#fef3c7;box-shadow:0 0 22px #facc15aa,0 6px 14px #000a}
+.tnode.boss .bi{font-size:34px;line-height:1;filter:drop-shadow(0 0 6px currentColor)}
+.tnode.boss .bt{font-size:10px;letter-spacing:.12em;margin-top:2px}
+.tnode.boss.lock{opacity:.7;filter:saturate(.5)}
+.tnode.boss.done{background:radial-gradient(circle at 35% 25%,#16a34a,#14532d);border-color:#4ade80;box-shadow:0 0 18px #22c55e99}
+.tnode.boss.cur{width:96px;height:96px;font-size:18px;animation:bosspulse 1.1s ease-in-out infinite}
+@keyframes curpulse{0%,100%{box-shadow:0 0 0 0 #facc15aa,0 0 14px #f59e0b}50%{box-shadow:0 0 0 14px #facc1500,0 0 28px #fbbf24}}
+@keyframes bosspulse{0%,100%{box-shadow:0 0 0 0 #ef4444cc,0 0 20px #ef4444}50%{box-shadow:0 0 0 16px #ef444400,0 0 38px #facc15}}
+@keyframes youbob{50%{transform:translate(-50%,-4px)}}
+#zb{position:fixed;top:64px;left:50%;z-index:40;max-width:92vw;transform:translate(-50%,-30px);opacity:0;pointer-events:none;padding:9px 16px;border-radius:14px;font-size:13px;font-weight:900;color:#fff;background:#050810ee;border:1px solid var(--g);box-shadow:0 0 22px var(--g),0 8px 20px #000a;text-align:center;transition:.4s}
+#zb span{color:var(--g)}#zb.show{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
@@ -697,8 +726,8 @@ async function startApp(){$('#auth').classList.add('hidden');$('#app').classList
  if(!S.welcome){S.welcome=true;save();await openPacks('welcome',1,'🎁 Sobre de bienvenida','🎁');render()}}
 
 /* ===================== NAVEGACIÓN ===================== */
-function go(t){TAB=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));render();$('#view').scrollTop=0}
-function render(){const v=$('#view');v.innerHTML={tower:vTower,tourn:vTourn,col:vCol,shop:vShop,set:vSet}[TAB]();if(TAB==='shop')tickGifts();if(TAB==='set')loadRanking()}
+function go(t){TAB=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));TZ=0;render();$('#view').scrollTop=0;if(t==='tower')towerScroll(false)}
+function render(){const v=$('#view');v.innerHTML={tower:vTower,tourn:vTourn,col:vCol,shop:vShop,set:vSet}[TAB]();if(TAB==='shop')tickGifts();if(TAB==='set')loadRanking();if(TAB==='tower'){towerInit();if(!v._tkeep)towerScroll(false)}}
 function modal(h){$('#modalBody').innerHTML=h;const m=$('#modal');m.classList.remove('hidden');m.classList.add('flex')}
 function closeModal(){const m=$('#modal');m.classList.add('hidden');m.classList.remove('flex')}
 
@@ -777,15 +806,46 @@ function tickGifts(){if(!S)return;navGlow();const g=$('#gifts');if(!g)return;con
 function claimCoins(){if(S.nextCoin>Date.now())return;S.coins+=150;S.nextCoin=Date.now()+3600000;save();hdr();snd('win');toast('+150 🪙');tickGifts()}
 async function claimPack(){if(S.nextPack>Date.now())return;S.nextPack=Date.now()+8*3600000;save();await openPacks('free',1,'Sobre gratis','🎁');render()}
 
-/* ===================== TORRE UI ===================== */
-function vTower(){const d=S.tower.done;let o=`<div class="text-center mb-3"><div class="text-xl font-black">🏰 Torre del Infinito</div><div class="text-xs text-slate-400">${d}/${TOWER_TOTAL} combates · Equipo ${S.team.length}/5</div></div>`;
- if(S.box>0)o+=`<button class="btn gold w-full mb-3" onclick="openBox()">📦 Abrir Caja de Fase (${S.box} sobres)</button>`;
- if(d>=TOWER_TOTAL)o+=`<div class="panel text-center mb-3">🏆 ¡Has completado las 10 fases!</div>`;
- for(let p=1;p<=10;p++){const[a,b]=phaseRange(p),ph=PH[p-1],cleared=d>=b,cur=d>=a&&d<b;
-  o+=`<div class="panel mb-2 ${cur?'ring-2 ring-amber-400':''} ${d<a?'opacity-50':''}"><div class="flex justify-between items-center"><div><div class="font-black">Fase ${p} ${cleared?'✅':cur?'⚔️':'🔒'}</div><div class="text-[11px] text-slate-400">Jefe: ${ph.title}</div></div><div class="text-xs text-slate-300">${Math.min(Math.max(d-a,0),b-a)}/${b-a}</div></div>`;
-  if(cur){o+=`<div class="mt-2 grid grid-cols-5 gap-1.5">`;for(let g=a;g<b;g++){const F=towerFight(g),st=g<d?'done':g===d?'cur':'';o+=`<button class="fnode ${st} ${F.boss?'boss':''}" ${g===d?'onclick="towerPreview()"':''}>${g<d?'✓':F.boss?'👑':g-a+1}</button>`}o+='</div>'}
-  o+='</div>'}
- return o}
+/* ===================== TORRE UI (mapa continuo en zigzag) ===================== */
+const ZONE=[
+ {c:'#4a0d0d',g:'#ef4444',ic:'💀',bk:'skull',wm:'☠️'},   /* Red Skull · Hydra */
+ {c:'#0b3d1e',g:'#4ade80',ic:'💀',bk:'skull',wm:'💪'},   /* Abomination · Gamma */
+ {c:'#0c3b36',g:'#facc15',ic:'👑',bk:'crown',wm:'🐍'},   /* Loki */
+ {c:'#0b2a52',g:'#38bdf8',ic:'👑',bk:'crown',wm:'🤖'},   /* Ultron */
+ {c:'#4a0a6b',g:'#e879f9',ic:'👑',bk:'crown',wm:'🔮'},   /* Scarlet Witch · Darkhold */
+ {c:'#10261f',g:'#34d399',ic:'💀',bk:'skull',wm:'💀'},   /* Hela */
+ {c:'#1e1b6b',g:'#22d3ee',ic:'👑',bk:'crown',wm:'⏳'},   /* Kang */
+ {c:'#5b0a4d',g:'#fb923c',ic:'👑',bk:'crown',wm:'🌀'},   /* Dormammu */
+ {c:'#0a0a12',g:'#f43f5e',ic:'💀',bk:'skull',wm:'🖤'},   /* Gorr */
+ {c:'#2a0e63',g:'#fbbf24',ic:'👑',bk:'crown',wm:'🟣'}];  /* Thanos · cósmico */
+const TYI={minions:'⚔️',duel:'🥊',multi:'👥',squad:'🛡️',boss:'👑'};
+let TMAP=null,TZ=0,TZT=0,TDRAG=false;
+function buildMap(){const ROW=82,BOSSX=46,RIB=64,PADB=40,PADT=60;let b=PADB;const pos=[],bands=[];
+ for(let p=1;p<=10;p++){const[a,e]=phaseRange(p);const b0=b;b+=RIB;for(let g=a;g<e;g++){const boss=g===e-1;b+=ROW/2+(boss?BOSSX/2:0);pos[g]={b,boss,p,i:g-a};b+=ROW/2+(boss?BOSSX/2:0)}bands.push({p,b0,b1:b})}
+ const H=b+PADT;pos.forEach(n=>{n.y=H-n.b;n.x=n.boss?50:50+31*Math.sin(((n.p-1)*10+n.i)*1.12)});
+ bands.forEach(z=>{z.top=H-z.b1;z.bot=H-z.b0});return{pos,bands,H}}
+function vTower(){const d=S.tower.done,cur=Math.min(d,TOWER_TOTAL-1);TMAP=TMAP||buildMap();const{pos,bands,H}=TMAP;
+ let o=`<div class="tw-head"><div class="text-center"><div class="text-lg font-black leading-tight">🏰 Torre del Infinito</div><div class="text-[11px] text-slate-300">${d}/${TOWER_TOTAL} combates · Equipo ${S.team.length}/5</div></div>${S.box>0?`<button class="btn gold w-full mt-2" onclick="openBox()">📦 Abrir Caja de Fase (${S.box} sobres)</button>`:''}${d>=TOWER_TOTAL?'<div class="text-center text-amber-300 font-black text-sm mt-1">🏆 ¡Has completado las 10 fases!</div>':''}</div>`;
+ const stops=bands.map((z,i)=>`${ZONE[i].c} ${((H-(z.top+z.bot)/2)/H*100).toFixed(1)}%`);
+ const bg=`linear-gradient(to top,${ZONE[0].c} 0%,${stops.join(',')},${ZONE[9].c} 100%)`;
+ o+=`<div id="tmap" class="tmap" style="height:${H}px;background:${bg}">`;
+ bands.forEach((z,i)=>{const Z=ZONE[i],ph=PH[i],lock=d<phaseRange(z.p)[0];
+  o+=`<div class="tz" style="top:${z.top}px;height:${z.bot-z.top}px;background:radial-gradient(70% 55% at 50% 50%,${Z.g}26,transparent 70%)"><div class="tz-wm">${Z.wm}</div></div>`;
+  o+=`<div class="tz-rib ${lock?'lock':''}" style="top:${z.bot-52}px;--g:${Z.g}"><span>📍 ZONA ${z.p}</span> ${ph.title}</div>`});
+ let seg='';for(let g=0;g<TOWER_TOTAL-1;g++){const A=pos[g],B=pos[g+1],my=(A.y+B.y)/2,dn=g+1<=d;seg+=`<path d="M${A.x.toFixed(1)} ${A.y.toFixed(0)} C${A.x.toFixed(1)} ${my.toFixed(0)},${B.x.toFixed(1)} ${my.toFixed(0)},${B.x.toFixed(1)} ${B.y.toFixed(0)}" class="${dn?'pd':'pl'}"/>`}
+ o+=`<svg class="tsvg" viewBox="0 0 100 ${H}" preserveAspectRatio="none">${seg}</svg>`;
+ for(let g=0;g<TOWER_TOTAL;g++){const n=pos[g],Z=ZONE[n.p-1],st=g<d?'done':g===d?'cur':'lock',ty=PAT[n.p][n.i];
+  const inner=n.boss?`<span class="bi">${st==='done'?'✓':Z.ic}</span><span class="bt">${st==='lock'?'🔒':'JEFE'}</span>`:st==='done'?'✓':st==='lock'?'<span class="opacity-70">🔒</span>':`<span>${n.i+1}</span>`;
+  o+=`<button id="tn${g}" class="tnode ${st} ${n.boss?'boss '+Z.bk:''}" style="left:${n.x.toFixed(2)}%;top:${n.y}px;--g:${Z.g}" ${st==='cur'?'onclick="towerPreview()"':''}>${inner}${!n.boss&&st!=='lock'?`<i class="ty">${TYI[ty]}</i>`:''}${st==='cur'?'<em class="you">▼ TÚ</em>':''}</button>`}
+ return o+'</div>'}
+function towerScroll(smooth){const v=$('#view'),n=$('#tn'+Math.min(S.tower.done,TOWER_TOTAL-1));if(!v||!n)return;const vr=v.getBoundingClientRect(),nr=n.getBoundingClientRect();v.scrollTo({top:Math.max(0,v.scrollTop+(nr.top-vr.top)-v.clientHeight*.5+nr.height/2),behavior:smooth?'smooth':'auto'})}
+function zoneBanner(p){let el=$('#zb');if(!el){el=document.createElement('div');el.id='zb';document.body.appendChild(el)}const Z=ZONE[p-1];el.style.setProperty('--g',Z.g);el.innerHTML=`<span>📍 ZONA:</span> ${PH[p-1].title}`;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');clearTimeout(TZT);TZT=setTimeout(()=>el.classList.remove('show'),2600)}
+function towerOnScroll(){if(TAB!=='tower'||!TMAP)return;const v=$('#view'),m=$('#tmap');if(!m)return;const y=v.scrollTop+v.clientHeight*.45-m.offsetTop;const z=TMAP.bands.find(z=>y>=z.top&&y<z.bot);if(z&&z.p!==TZ){TZ=z.p;zoneBanner(z.p)}}
+function towerInit(){const v=$('#view');if(v._ti)return;v._ti=1;let raf=0;v.addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;towerOnScroll()})},{passive:true});
+ let sy=0,st=0,down=false,mv=0;v.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||TAB!=='tower')return;down=true;sy=e.clientY;st=v.scrollTop;mv=0});
+ window.addEventListener('pointermove',e=>{if(!down)return;const dy=e.clientY-sy;mv=Math.max(mv,Math.abs(dy));if(mv>5){TDRAG=true;v.scrollTop=st-dy}});
+ window.addEventListener('pointerup',()=>{down=false;setTimeout(()=>TDRAG=false,0)});
+ v.addEventListener('click',e=>{if(TDRAG){e.stopPropagation();e.preventDefault()}},true)}
 function enemyRows(list){const g={};list.forEach(f=>{(g[f.label]=g[f.label]||{f,n:0}).n++});return Object.values(g).map(({f,n})=>`<div class="flex items-center gap-2 text-sm py-1"><span class="text-2xl">${f.emoji}</span><span class="flex-1 font-bold truncate">${f.label}${n>1?' ×'+n:''}</span><span class="text-[11px] text-slate-300">❤️${f.max} ⚔️${f.atk} 🛡️${f.def}</span></div>`).join('')}
 function towerPreview(){if(!S.team.length)return toast('Equipa al menos 1 héroe en Colección');const F=towerFight(S.tower.done),E=buildEnemies(F),rw=towerReward(F);
  modal(`<div class="flex justify-between"><div class="font-black">Fase ${F.p} · Combate ${F.i+1}</div><button class="chip" onclick="closeModal()">✕</button></div><div class="text-sm text-amber-300 font-bold mb-1">${F.title}</div>${F.k>1?`<div class="text-[11px] text-slate-300 mb-2">⚔️ Formato ${F.k} vs ${F.k}: ${F.k} luchadores activos por bando (${E.length} rivales en total). Los ataques van a un rival activo al azar.</div>`:'<div class="mb-2"></div>'}${S.team.length<F.k?`<div class="text-[11px] text-red-300 mb-2">⚠️ Solo tienes ${S.team.length} héroe(s) en el equipo: el rival pondrá ${F.k} a la vez.</div>`:''}<div class="panel mb-3 max-h-48 overflow-y-auto">${enemyRows(E)}</div>
