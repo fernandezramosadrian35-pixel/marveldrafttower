@@ -212,73 +212,120 @@ const RAW = [
  ['Loki','Villain','🐍',105,24,5,'Asgard'], ['Hela','Villain','🦌',145,34,8,'Asgard'],
  ['Ultron','Villain','🧠',135,30,10,'Tech'], ['Kang','Villain','⏳',120,31,7,'Multiverse'],
  ['Dormammu','Villain','🔥',150,33,11,'Cosmic'], ['Gorr','Villain','🖤',140,32,8,'Cosmic'],
- ['Ego','Villain','🪐',160,34,10,'Cosmic'], ['Green Goblin','Villain','🎃',100,28,5,'Villains'],
+ ['Green Goblin','Villain','🎃',100,28,5,'Villains'],
  ['Venom','Villain','👅',140,29,7,'Villains'], ['Mysterio','Villain','🌫️',85,20,3,'Villains'],
  ['Red Skull','Villain','☠️',100,23,6,'Villains'], ['Ronan','Villain','🔨',135,30,9,'Villains'],
  ['Abomination','Villain','🐊',150,26,10,'Villains'], ['Doc Ock','Villain','🐙',110,27,8,'Villains'],
  ['Killmonger','Villain','⛓️',115,29,8,'Wakanda']
 ];
 const AB_RAW = [
- ['Iron Man','ironman','Unibeam','normal','Golpe concentrado del 220% de daño que ignora la defensa rival.'],
- ['Captain America','cap','Maestría en Absorción','P','+3 DEF con cada ataque que realiza (máx. +15) y devuelve el 20% del daño recibido.'],
- ['Thor','thor','Rayo Divino','slow','Triple daño y electrocuta al rival: 15 HP de daño extra por turno durante 2 turnos.'],
- ['Hulk','hulk','Furia Desbordada','P','+5 ATK permanente con cada golpe que da o recibe (máx. +40).'],
- ['Black Widow','bw','Precisión de Asesina','P','Cada ataque suma +10% de probabilidad de crítico, acumulable durante el duelo.'],
- ['Hawkeye','hawkeye','Ojo de Halcón','P','Probabilidad de crítico permanente del 25% (1 de cada 4 ataques hace x2).'],
- ['Falcon','falcon','Vuelo Evasivo','P','20% de probabilidad de esquivar por completo cualquier ataque.'],
- ['Winter Soldier','winter','Brazo de Vibranium','P','Probabilidad de crítico permanente del 15%.'],
- ['Vision','vision','Fase Intangible','P','El primer ataque que recibe en cada duelo lo atraviesa sin hacerle daño.'],
- ['Ant-Man','antman','Encogimiento Pym','normal','Golpea al 80% y encoge al rival: su ATK se reduce a la mitad de forma permanente.'],
- ['Scarlet Witch','scarlet','Estructura de la Realidad','slow','Roba el 60% de la vida actual del rival y se la suma a la suya.'],
- ['Doctor Strange','strange','Bucle Temporal','slow','Retrocede el tiempo: recupera la vida que tenía al empezar el duelo.'],
- ['Wolverine','wolverine','Células Adaptativas','P','Recupera el 10% de su HP máxima al inicio de cada uno de sus turnos.'],
- ['Deadpool','deadpool','Factor Curativo Inmortal','P','La primera vez que su HP llega a 0, resucita al instante con el 60% de su vida máxima.'],
- ['America Chavez','america','Portal Estelar','fast','Golpe del 100% y abre un portal: esquiva por completo el siguiente ataque recibido.'],
- ['Spider-Man','spider','Inmovilización con Telaraña','fast','Daño + inmoviliza al rival 1 turno completo: se salta su siguiente ataque.'],
- ['Daredevil','daredevil','Sentidos Agudizados','P','30% de probabilidad fija de esquivar por completo cualquier ataque.'],
- ['Moon Knight','moonknight','Avatar de Khonshu','P','Cuanto más herido está, más fuerte pega: hasta +60% de daño con la vida casi agotada.'],
- ['Punisher','punisher','Último Cartucho','P','Gana +2% de daño de ataque por cada 1% de HP que le falte.'],
- ['Shang-Chi','shang','Diez Anillos','fast','Doble ataque seguido; cada golpe puede ser crítico.'],
- ['Black Panther','bp','Traje Cinético','P','Acumula el 25% del daño recibido y lo suma como daño extra en su siguiente impacto.'],
- ['Shuri','shuri','Pulso Tecnológico','normal','Golpea al 80% y reduce la DEF rival a la mitad de forma permanente.'],
- ['Okoye','okoye','Lanza Dora Milaje','P','Sus ataques ignoran el 30% de la DEF rival.'],
- ['Captain Marvel','marvel','Absorción Binaria','normal','Golpe del 150% y se cura el 100% del daño infligido.'],
- ['Namor','namor','Embestida de Talokan','P','Su primer ataque de cada duelo inflige un 50% más de daño.'],
- ['Star-Lord','starlord','Ráfaga de Blasters','fast','Tres disparos seguidos, cada uno con el 60% del daño.'],
- ['Gamora','gamora','La Mujer Más Letal','P','+30% de daño contra rivales con menos del 50% de vida.'],
- ['Drax','drax','Destructor Inamovible','P','Inmune a golpes críticos y a la inmovilización.'],
- ['Rocket','rocket','Arsenal Improvisado','P','20% de probabilidad de disparar un ataque extra con el 50% de daño.'],
- ['Groot','groot','Espinas Vivas','P','Devuelve 6 de daño fijo al atacante por cada golpe recibido.'],
- ['Nebula','nebula','Sobrecarga Cibernética','normal','Sus siguientes 3 ataques infligen un 50% más de daño.'],
- ['Thanos','thanos','El Chasquido','slow','Daño masivo imparable (250% de ATK) y el 35% de ese daño a todos los suplentes rivales.'],
- ['Loki','loki','Intercambio Ilusorio','normal','Intercambia su % de vida con el del rival.'],
- ['Hela','hela','Dios de la Muerte','slow','Inflige el 40% de la vida actual del rival, sin poder esquivarse.'],
- ['Ultron','ultron','Copia de Seguridad','P','La primera vez que baja del 30% de vida, se restaura un 40% de su vida máxima.'],
- ['Kang','kang','Sobrecarga Temporal','normal','Pone la energía del rival a 0% y golpea con un 120% de daño.'],
- ['Dormammu','dormammu','Dimensión Oscura','slow','Golpea y prende al rival en llamas oscuras: pierde el 10% de su HP máxima durante 3 turnos.'],
- ['Gorr','gorr','Carnicero de Dioses','P','+50% de daño contra personajes Asgard y Cosmic.'],
- ['Ego','ego','Expansión Celestial','slow','Se cura el 35% de su vida máxima y gana +10 ATK permanente.'],
- ['Green Goblin','goblin','Toxina de Plasma','P','Sus ataques envenenan: el rival pierde el 6% de su HP máxima cada turno.'],
- ['Venom','venom','Devorador Simbionte','normal','Si el rival tiene menos del 30% de vida, lo ejecuta al instante. Si no, muerde al 150%.'],
- ['Mysterio','mysterio','Ilusión Total','fast','Golpea al 80% y confunde al rival 2 turnos.'],
- ['Red Skull','redskull','Maldición del Teseracto','normal','Golpea y reduce la HP máxima del rival un 20%.'],
- ['Ronan','ronan','Martillo Universal','normal','Golpe del 250% de daño; sufre un retroceso del 10% de su HP.'],
- ['Abomination','abomination','Furia Gamma','P','Con menos del 50% de vida gana +40% de daño.'],
- ['Doc Ock','docock','Tentáculos Mecánicos','P','Cada ataque añade 8 de daño fijo que ignora la defensa.'],
- ['Killmonger','killmonger','Jaque Mate','fast','Golpe del 140% y su siguiente ataque es un crítico garantizado.']
+ /* [personaje, id, nombre, tipo(P/fast/normal/slow), descripción general, [efecto en Nv1..Nv5]] */
+ ['Iron Man','ironman','Unibeam','normal','Rayo que golpea a TODOS los rivales activos y perfora su defensa.',
+  ['Daño 120% a todos · ignora 40% DEF','Ignora 60% DEF','Daño 130% · cada rival alcanzado pierde 3 DEF','Daño 150% · ignora 80% DEF','Daño 160% · ignora 100% DEF y drena 30 de energía a cada rival']],
+ ['Captain America','cap','Maestría en Absorción','P','Cada ataque endurece su defensa y devuelve parte del daño que recibe.',
+  ['+3 DEF por ataque (máx. +9) · devuelve 10% del daño recibido','Máx. +12 DEF · devuelve 15%','Máx. +15 DEF · devuelve 25%','Empieza con +5 DEF · máx. +18 · devuelve 30%','Máx. +24 DEF · devuelve 40% · al empezar el combate todo el equipo recibe un escudo del 20% de su vida']],
+ ['Thor','thor','Rayo Divino','slow','Descarga que daña y electrocuta a TODOS los rivales activos.',
+  ['Daño 150% · electrocuta 2 turnos (15 por turno)','Daño 170% · 18 por turno','Daño 190% · 3 turnos · 22 por turno','Daño 210% · 26 por turno','Daño 240% · 4 turnos · 30 por turno · la descarga salta a otro rival (50%)']],
+ ['Hulk','hulk','Furia Desbordada','P','Gana ATK con cada golpe que da o recibe.',
+  ['+5 ATK por golpe (máx. +20)','Máx. +35 ATK','Máx. +50 · +6 por golpe · cada golpe recibido le cura 2% de su vida','Máx. +65 · +7 por golpe','Máx. +80 · +8 por golpe · inmune a aturdimientos y confusión']],
+ ['Black Widow','bw','Precisión de Asesina','P','Cada ataque aumenta su probabilidad de crítico durante el duelo.',
+  ['+5% de crítico por ataque (máx. 70%)','+6% por ataque','+7% por ataque · los críticos ignoran 40% DEF','+8% por ataque · los críticos hacen x2,4','+10% por ataque · el primer ataque del combate es crítico garantizado']],
+ ['Hawkeye','hawkeye','Ojo de Halcón','fast','Lluvia de flechas sobre TODOS los rivales activos; además tiene crítico pasivo.',
+  ['Lluvia 70% a todos · 15% de crítico pasivo','Lluvia 75% · 20% de crítico','Lluvia 80% · 25% de crítico','Lluvia 85% · flechas perforantes (ignoran 30% DEF) · 30% de crítico','Lluvia 90% · dispara dos veces seguidas · 35% de crítico']],
+ ['Falcon','falcon','Vuelo Evasivo','fast','Pica sobre TODOS los rivales activos y esquiva ataques de forma pasiva.',
+  ['Picado 60% a todos · 15% de esquiva','20% de esquiva','Picado 70% · 25% de esquiva · contraataca (50%) tras esquivar','Picado 80% · 30% de esquiva','Picado 90% · 35% de esquiva · tras picar, esquiva garantizada el siguiente ataque']],
+ ['Winter Soldier','winter','Brazo de Vibranium','P','Probabilidad permanente de crítico con efectos extra.',
+  ['10% de crítico','15% de crítico','20% de crítico · los críticos ignoran 30% DEF','25% de crítico · cada crítico da +4 ATK (máx. +24)','30% de crítico · 50% de que un crítico aturda 1 turno']],
+ ['Vision','vision','Fase Intangible','P','Los primeros ataques recibidos lo atraviesan sin hacerle daño.',
+  ['El 1er ataque recibido lo atraviesa','Los 2 primeros ataques','2 ataques · cada fase lo cura un 8%','3 ataques','3 ataques · cura 12% · contraataca con un rayo solar (100%)']],
+ ['Ant-Man','antman','Encogimiento Pym','normal','Golpea y encoge el ATK del rival.',
+  ['Golpe 80% · ATK del rival −30%','ATK −40%','Golpe 90% · ATK −50% · drena 20 de energía','Golpe 110%','Golpe 110% · ATK −60% · afecta a TODOS los rivales activos']],
+ ['Scarlet Witch','scarlet','Estructura de la Realidad','slow','Roba vida a TODOS los rivales activos y se cura con ella.',
+  ['Roba 20% de la vida actual de cada rival · se cura 50% de lo robado','25% · cura 60%','30% · cura 70% · los rivales quedan confusos 1 turno','35% · cura 85%','40% · cura 100% · lo que no puede curar se convierte en escudo (30%)']],
+ ['Doctor Strange','strange','Bucle Temporal','slow','Retrocede el tiempo: se cura y deja sin energía a TODOS los rivales activos.',
+  ['Recupera 50% de la vida perdida · energía de todos los rivales a 0','65% · además golpea a todos al 40%','80% · golpe 50% · aturde 1 turno a todos','90% · golpe 60%','100% · golpe 70% · el equipo activo también recupera su vida perdida']],
+ ['Wolverine','wolverine','Células Adaptativas','P','Se regenera al inicio de cada uno de sus turnos.',
+  ['Regenera 6% de su vida por turno','8% por turno','10% · el doble por debajo del 50% de vida','12% · sus garras causan sangrado (4% × 2 turnos)','14% · sobrevive una vez a un golpe mortal con 1 de vida']],
+ ['Deadpool','deadpool','Factor Curativo Inmortal','P','Resucita al morir por primera vez.',
+  ['Resucita con 40% de vida','Con 55%','Con 70% · gana +15 ATK al resucitar','Con 85% · 1 turno de invulnerabilidad tras resucitar','Con 100% · 2 turnos de invulnerabilidad']],
+ ['America Chavez','america','Portal Estelar','fast','Golpea y abre un portal que anula ataques del rival.',
+  ['Golpe 100% · esquiva el siguiente ataque','Golpe 110%','Golpe 120% · el portal absorbe 2 ataques','Golpe 130% · contraataca (60%) al esquivar por el portal','Golpe 140% · aturde 1 turno al rival que atacó el portal']],
+ ['Spider-Man','spider','Inmovilización con Telaraña','fast','Golpea e inmoviliza al rival; evoluciona con veneno y un segundo objetivo.',
+  ['Golpe 100% · inmoviliza 1 turno','Golpe 110%','Golpe 110% · veneno: sangrado 4% × 3 turnos','Golpe 120% · sangrado 6%','Golpe 120% · inmoviliza también a un segundo rival']],
+ ['Daredevil','daredevil','Sentidos Agudizados','P','Probabilidad fija de esquivar cualquier ataque.',
+  ['20% de esquiva','24% de esquiva','28% · contraataca (50%) tras esquivar','32% · sus ataques no pueden esquivarse','36% · contraataca al 100%']],
+ ['Moon Knight','moonknight','Avatar de Khonshu','P','Cuanto más herido está, más fuerte pega.',
+  ['Hasta +40% de daño con la vida casi agotada','Hasta +60%','Hasta +70% · bajo 50% de vida se cura 10% del daño','Hasta +80%','Hasta +100% · bajo 25% de vida esquiva 30% de los ataques']],
+ ['Punisher','punisher','Último Cartucho','P','Gana daño por cada 1% de vida que le falta.',
+  ['+2% de daño por cada 1% de vida perdida','+2,4% por cada 1%','+2,8% · bajo 50% de vida ignora 25% DEF','+3,2% por cada 1%','+3,6% · bajo 20% de vida todos sus ataques son críticos']],
+ ['Shang-Chi','shang','Diez Anillos','fast','Ráfaga de golpes seguidos contra un único objetivo.',
+  ['2 golpes de 100% · +10% de crítico','2 golpes · +20% de crítico','3 golpes de 90%','3 golpes de 100% · +30% de crítico · aturde 1 turno','4 golpes de 105% · +35% de crítico']],
+ ['Black Panther','bp','Traje Cinético','P','Acumula daño recibido y lo libera en su siguiente golpe como daño real.',
+  ['Acumula 20% del daño recibido','30%','40% · al liberarlo se cura el 30% de ese daño','50%','60% · la liberación inflige 150%']],
+ ['Shuri','shuri','Pulso Tecnológico','normal','Pulso que golpea a TODOS los rivales activos y reduce su defensa.',
+  ['Golpe 70% a todos · DEF −25%','Golpe 75% · DEF −35%','Golpe 80% · DEF −50% · drena 25 de energía','Golpe 90%','Golpe 100% · DEF −60% · la reducción se acumula con cada uso']],
+ ['Okoye','okoye','Lanza Dora Milaje','P','Sus ataques perforan la defensa y pueden encadenar un doble golpe.',
+  ['Ignora 20% DEF','Ignora 30% DEF','Ignora 40% · 20% de doble golpe (60%)','Ignora 50% · 25% de doble golpe','Ignora 60% · 35% de doble golpe']],
+ ['Captain Marvel','marvel','Absorción Binaria','normal','Gran golpe a un objetivo y se cura con el daño infligido.',
+  ['Golpe 150% · se cura 50% del daño','Golpe 160% · cura 60%','Golpe 170% · cura 80% · la curación sobrante se vuelve escudo (50%)','Golpe 180% · cura 100% · roba 30 de energía','Golpe 200% · escudo del sobrante al 100% · gana +8 ATK en cada uso (máx. +40)']],
+ ['Namor','namor','Embestida de Talokan','P','Su primer ataque del duelo es devastador.',
+  ['Primer ataque +50% de daño','+70%','+90% · cada 3er ataque +50%','+110%','+130% · el primer ataque aturde 1 turno']],
+ ['Star-Lord','starlord','Ráfaga de Blasters','fast','Ráfagas de disparos sobre TODOS los rivales activos.',
+  ['1 ráfaga de 55% a todos','2 ráfagas de 50%','2 ráfagas de 60%','3 ráfagas de 55%','3 ráfagas de 65% · la última es crítica']],
+ ['Gamora','gamora','La Mujer Más Letal','P','Remata a los rivales heridos.',
+  ['+30% de daño contra rivales bajo 50% de vida','+40%','+50% · los ignora 25% DEF','+60%','+70% · ejecuta a los rivales bajo 10% de vida']],
+ ['Drax','drax','Destructor Inamovible','P','Inmune a críticos y aturdimientos; con el tiempo se vuelve un muro.',
+  ['Inmune a críticos y aturdimientos','−10% de daño recibido','−15% · inmune a veneno, sangrado, quemadura, descarga y confusión','−20% · provoca: 50% de los ataques rivales lo eligen','−25% · devuelve 20% del daño recibido']],
+ ['Rocket','rocket','Arsenal Improvisado','normal','Bomba sobre TODOS los rivales activos; sus disparos normales pueden repetirse.',
+  ['Bomba 60% a todos · 20% de disparo extra','Bomba 70% · 25% de disparo extra','Bomba 80% · quema (3% × 2 turnos)','Bomba 90% · 30% de disparo extra','Bomba 100% · deja confusos a los rivales 1 turno']],
+ ['Groot','groot','Espinas Vivas','P','Devuelve daño fijo a quien lo golpea.',
+  ['Devuelve 6 de daño por golpe','Devuelve 9','Devuelve 12 · regenera 3% de vida por turno','Devuelve 16','Devuelve 20 · 25% de aturdir al atacante']],
+ ['Nebula','nebula','Sobrecarga Cibernética','normal','Golpea y potencia sus siguientes ataques.',
+  ['Siguientes 2 ataques +40%','3 ataques +50%','3 ataques +60% · se cura 15% del daño','4 ataques +70%','5 ataques +80% · +20% de crítico mientras dura']],
+ ['Thanos','thanos','El Chasquido','slow','Golpe imparable a un objetivo; el daño también alcanza a los suplentes rivales.',
+  ['Golpe 220% imparable · 30% a los suplentes rivales','250% · 40% a suplentes','280% · 50% · ejecuta bajo 12% de vida','310% · 60% · ejecuta bajo 18%','350% · 70% · ejecuta bajo 25% · deja al rival sin energía']],
+ ['Loki','loki','Intercambio Ilusorio','normal','Intercambia su % de vida con el del rival.',
+  ['Intercambia su % de vida con el del rival','Solo si le beneficia; si no, golpea al 120%','Además deja al rival confuso 1 turno','Además esquiva el siguiente ataque','Además roba 25 de energía al rival']],
+ ['Hela','hela','Dios de la Muerte','slow','Quita un porcentaje de la vida actual del rival sin poder esquivarse.',
+  ['30% de la vida actual del rival','35% · ignora escudos e invulnerabilidad','40% · se cura 30% del daño','45% · cura 40%','50% · cura 50% · ejecuta bajo 20% de vida']],
+ ['Ultron','ultron','Copia de Seguridad','normal','Enjambre de drones sobre TODOS los rivales activos y copia de seguridad al caer.',
+  ['Enjambre 50% a todos · al bajar de 30% de vida se restaura 30%','Enjambre 55% · restaura 40%','65% · restaura 50% · tras restaurarse gana +12 ATK','75% · restaura 60%','85% · restaura 70% · puede restaurarse una 2ª vez bajo 15%']],
+ ['Kang','kang','Sobrecarga Temporal','normal','Pone a 0 la energía de TODOS los rivales activos y los golpea.',
+  ['Energía a 0 · golpe 80% a todos','Golpe 90%','Golpe 100% · 50% de aturdir 1 turno','Golpe 110% · 70% de aturdir','Golpe 120% · 100% de aturdir · gana 60 de energía']],
+ ['Dormammu','dormammu','Dimensión Oscura','slow','Prende en llamas oscuras a TODOS los rivales activos.',
+  ['Golpe 80% a todos · llamas 8% × 3 turnos','Golpe 90% · llamas 10%','Golpe 100% · llamas 10% × 4 turnos','Golpe 110% · llamas 12%','Golpe 120% · 12% × 5 turnos · se cura 50% del daño de las llamas']],
+ ['Gorr','gorr','Carnicero de Dioses','P','Daño extra contra dioses; con el nivel amplía sus presas.',
+  ['+40% de daño contra Asgard y Cosmic','+50%','+60% · también contra Multiverse','+70% · también contra Tech','+80% contra todos los rivales']],
+ ['Green Goblin','goblin','Toxina de Plasma','normal','Nube de gas que envenena a TODOS los rivales activos; sus ataques también envenenan.',
+  ['Gas 40% a todos · veneno 4% por turno · sus ataques envenenan 3%','Veneno 5% · ataques 4%','Gas 50% · veneno 6% · ataques 5% · el veneno reduce a la mitad las curaciones','Veneno 7% · ataques 6%','Gas 70% · veneno 8% · ataques 7%']],
+ ['Venom','venom','Devorador Simbionte','normal','Ejecuta a los rivales heridos o muerde con fuerza.',
+  ['Ejecuta bajo 25% de vida · si no, golpe 140%','30% · golpe 150%','35% · 160% · se cura 30% del daño','40% · 170%','45% · 180% · ejecutar le cura 50% de su vida']],
+ ['Mysterio','mysterio','Ilusión Total','fast','Ilusiones que golpean y confunden a TODOS los rivales activos.',
+  ['Ilusión 60% a todos · confusión 1 turno','Ilusión 70% · confusión 2 turnos','Ilusión 80% · 20% de esquiva','Ilusión 90% · +25% de daño contra rivales confusos','Ilusión 100% · confusión 3 turnos · drena 30 de energía']],
+ ['Red Skull','redskull','Maldición del Teseracto','normal','Golpea a TODOS los rivales activos y reduce su vida máxima.',
+  ['Golpe 70% a todos · HP máx −10%','Golpe 80% · −12%','Golpe 90% · −15% · DEF −3','Golpe 100% · −18%','Golpe 110% · −20% · se cura lo que quita']],
+ ['Ronan','ronan','Martillo Universal','normal','Golpe enorme a un objetivo con retroceso que se reduce con el nivel.',
+  ['Golpe 220% · retroceso 12%','Golpe 240% · retroceso 10%','Golpe 260% · retroceso 8% · ignora 25% DEF','Golpe 280% · retroceso 5% · 50% de aturdir','Golpe 300% · sin retroceso · no se puede esquivar']],
+ ['Abomination','abomination','Furia Gamma','P','Herido, se vuelve más peligroso.',
+  ['Bajo 50% de vida +30% de daño','+40% de daño','Bajo 55% de vida · +50% · +4 DEF','Bajo 60% de vida · +60%','Bajo 65% de vida · +70% · regenera 5% por turno']],
+ ['Doc Ock','docock','Tentáculos Mecánicos','P','Cada ataque añade daño fijo que ignora la defensa.',
+  ['+6 de daño fijo por ataque','+8','+10 · 25% de un tentáculo extra','+12 · +2 DEF por ataque (máx. +10)','+14 · el daño fijo salpica a los demás rivales activos (60%)']],
+ ['Killmonger','killmonger','Jaque Mate','fast','Golpe fuerte que prepara críticos garantizados.',
+  ['Golpe 120% · su siguiente ataque es crítico','Golpe 130%','Golpe 140% · ese crítico ignora 50% DEF','Golpe 150% · los 2 siguientes ataques son críticos','Golpe 170% · si mata, recupera 60 de energía']]
 ];
+
 const TIERS={E:{color:'#3b82f6',ic:'🔵',n:'Azul'},D:{color:'#22c55e',ic:'🟢',n:'Verde'},C:{color:'#a855f7',ic:'🟣',n:'Morado'},B:{color:'#f97316',ic:'🟠',n:'Naranja'},A:{color:'#ef4444',ic:'🔴',n:'Rojo'},S:{color:'#facc15',ic:'🟡',n:'Dorado'}};
 const TIER_ORDER=['E','D','C','B','A','S'];
 const TIER_LIST={
- E:['Okoye','Drax','Mysterio','Red Skull','Doc Ock'],
- D:['Moon Knight','Punisher','Star-Lord','Rocket','Groot','Nebula','Namor','Ronan','Killmonger','America Chavez','Gamora'],
- C:['Daredevil','Falcon','Winter Soldier','Ultron','Kang','Ego','Gorr','Abomination','Shuri'],
- B:['Black Widow','Hawkeye','Black Panther','Green Goblin','Ant-Man','Vision','Shang-Chi','Loki'],
+ E:['Okoye','Drax','Mysterio','Red Skull','Doc Ock','Rocket'],
+ D:['Moon Knight','Punisher','Star-Lord','Groot','Nebula','Namor','Ronan','Killmonger','America Chavez','Gamora'],
+ C:['Daredevil','Falcon','Winter Soldier','Black Widow','Kang','Gorr','Abomination','Shuri'],
+ B:['Ultron','Hawkeye','Black Panther','Green Goblin','Ant-Man','Vision','Shang-Chi','Loki'],
  A:['Iron Man','Captain America','Hulk','Venom','Captain Marvel','Hela','Dormammu'],
  S:['Thanos','Thor','Doctor Strange','Scarlet Witch','Deadpool','Spider-Man','Wolverine']};
 const CH={};
 RAW.forEach(r=>CH[r[0]]={name:r[0],type:r[1],emoji:r[2],hp:r[3],atk:r[4],def:r[5],team:r[6]});
-AB_RAW.forEach(a=>{CH[a[0]].ab={id:a[1],name:a[2],kind:a[3],desc:a[4]}});
+AB_RAW.forEach(a=>{CH[a[0]].ab={id:a[1],name:a[2],kind:a[3],desc:a[4],ev:a[5]}});
 TIER_ORDER.forEach(t=>TIER_LIST[t].forEach(n=>CH[n].tier=t));
 const NAMES=Object.keys(CH);
 const stAt=(b,l)=>Math.round(b*(1+(l-1)*0.04));
@@ -291,114 +338,224 @@ const PROBS={
  basic:{E:45,D:30,C:15,B:7,A:2.5,S:.5},
  premium:{E:20,D:30,C:28,B:15,A:5.5,S:1.5},
  free:{E:70,C:29,B:1},
- tower:{E:60,C:25,B:14.9,S:.1}};
+ tower:{E:60,C:25,B:14.9,S:.1},
+ special:{E:32.5,D:30,C:21.5,B:11,A:4,S:1}};
 function rollTier(p){let r=Math.random()*Object.values(p).reduce((a,b)=>a+b,0);for(const k in p){r-=p[k];if(r<=0)return k}return Object.keys(p)[0]}
 function drawCard(p){const l=TIER_LIST[rollTier(p)];return l[Math.floor(Math.random()*l.length)]}
 
 /* ===================== MOTOR DE COMBATE ===================== */
 let UID=0;
 const THR={fast:60,normal:90,slow:120};
-const kd=f=>1+0.08*(f.abLvl-1), kb=f=>1+0.05*(f.abLvl-1), hl=f=>0.02*(f.abLvl-1);
+/* valor de una tabla [Nv1..Nv5] según el nivel de despertar del luchador */
+const LV=(f,a)=>a[Math.max(0,Math.min(4,f.abLvl-1))];
 const has=(f,id)=>f.abLvl>0&&f.abId===id;
 const R=()=>Math.random();
-function base(o){return Object.assign({uid:'f'+(++UID),dead:false,energy:0,bonusAtk:0,bonusDef:0,critAcc:0,stun:0,conf:0,shock:null,burn:null,poison:0,boost:0,nextCrit:false,dodgeNext:false,used:{},stored:0,abLvl:0,abId:'none',abKind:'P',team:'-',lvl:1,aura:''},o)}
+const GORR=[['Asgard','Cosmic'],['Asgard','Cosmic'],['Asgard','Cosmic','Multiverse'],['Asgard','Cosmic','Multiverse','Tech'],null];
+function base(o){return Object.assign({uid:'f'+(++UID),dead:false,energy:0,bonusAtk:0,bonusDef:0,critAcc:0,stun:0,conf:0,shock:null,burn:null,bleed:null,poison:0,boost:0,nextCrit:0,dodgeNext:0,shield:0,inv:0,antiheal:false,used:{},stored:0,abLvl:0,abId:'none',abKind:'P',team:'-',lvl:1,aura:''},o)}
 function mkF(name,lvl,abLvl,x){x=x||{};const c=CH[name],m=x.all||1;const hp=Math.round(stAt(c.hp,lvl)*m*(x.hp||1));
  return base({name,label:x.label||name,emoji:c.emoji,team:c.team,lvl,max:hp,hp,atk:Math.round(stAt(c.atk,lvl)*m*(x.atk||1)),def:Math.round(stAt(c.def,lvl)*m*(x.def||1)),abId:c.ab.id,abKind:c.ab.kind,abLvl,aura:x.aura||''})}
 const MN={hp:100,atk:19,def:5};
 function mkMin(s,m){const hp=Math.round(MN.hp*m*(s.hp||1));return base({name:s.label,label:s.label,emoji:s.emoji,team:'Minion',max:hp,hp,atk:Math.round(MN.atk*m*(s.atk||1)),def:Math.round(MN.def*m)+1})}
-function icons(f){return(f.stun>0?'💤':'')+(f.conf>0?'😵':'')+(f.shock&&f.shock.t>0?'⚡':'')+(f.burn&&f.burn.t>0?'🔥':'')+(f.poison?'☠️':'')+(f.boost>0?'💢':'')+(f.bonusAtk>0?'⬆️':'')+(f.dodgeNext?'🌀':'')+(f.nextCrit?'🎯':'')}
+function icons(f){return(f.stun>0?'💤':'')+(f.conf>0?'😵':'')+(f.shock&&f.shock.t>0?'⚡':'')+(f.burn&&f.burn.t>0?'🔥':'')+(f.bleed&&f.bleed.t>0?'🩸':'')+(f.poison?'☠️':'')+(f.boost>0?'💢':'')+(f.bonusAtk>0?'⬆️':'')+(f.shield>0?'🛡️':'')+(f.inv>0?'✨':'')+(f.dodgeNext>0?'🌀':'')+(f.nextCrit>0?'🎯':'')}
 
+/* ---------- Habilidades activas (cada una evoluciona con su nivel de despertar) ---------- */
 const SK={
- ironman:(B,m,f)=>B.hit(m,f,2.2*kd(m),{ign:1}),
- thor:(B,m,f)=>{if(B.hit(m,f,3*kd(m))>0&&!f.dead)f.shock={t:2,d:Math.round(15*kd(m))}},
- antman:(B,m,f)=>{if(B.hit(m,f,.8*kd(m))>0&&!f.shrunk){f.shrunk=1;f.atk=Math.round(f.atk/2);B.say(f,'🐜 ATK a la mitad')}},
- scarlet:(B,m,f)=>{const x=Math.max(1,Math.round(f.hp*Math.min(.95,.6*kd(m))));B.hurt(f,x);B.heal(m,x,'Robo de vida')},
- strange:(B,m,f)=>{B.heal(m,Math.max(0,m.startHp-m.hp)+m.max*hl(m),'⏪ Bucle temporal')},
- america:(B,m,f)=>{B.hit(m,f,1*kd(m));m.dodgeNext=true},
- spider:(B,m,f)=>{if(B.hit(m,f,1*kd(m))>0&&!has(f,'drax')&&!f.dead)f.stun=1},
- shang:(B,m,f)=>{B.hit(m,f,1*kd(m));B.hit(m,f,1*kd(m))},
- starlord:(B,m,f)=>{for(let i=0;i<3;i++)B.hit(m,f,.6*kd(m))},
- shuri:(B,m,f)=>{if(B.hit(m,f,.8*kd(m))>0&&!f.halfDef){f.halfDef=1;f.def=Math.round(f.def/2);f.bonusDef=Math.round(f.bonusDef/2);B.say(f,'🛡️ DEF a la mitad')}},
- marvel:(B,m,f)=>{const d=B.hit(m,f,1.5*kd(m));B.heal(m,d,'Absorción')},
- nebula:(B,m,f)=>{B.hit(m,f,1);m.boost=3;B.say(m,'💢 +ATK x3')},
- thanos:(B,m,f)=>{const d=B.hit(m,f,2.5*kd(m),{noDodge:1});B.T[f.side].filter(x=>!x.dead&&!B.slots[f.side].includes(x)).forEach(x=>B.hurt(x,d*.35))},
- loki:(B,m,f)=>{const a=m.hp/m.max,b=f.hp/f.max;m.hp=Math.max(1,Math.round(b*m.max));f.hp=Math.max(1,Math.round(a*f.max));B.ev.push({k:'hpset',f:m,hp:m.hp,max:m.max},{k:'hpset',f,hp:f.hp,max:f.max});B.say(m,'🔀 Intercambio')},
- hela:(B,m,f)=>{B.hurt(f,Math.max(1,f.hp*Math.min(.9,.4*kd(m))))},
- kang:(B,m,f)=>{f.energy=0;B.say(f,'⚡ Energía a 0');B.hit(m,f,1.2*kd(m))},
- dormammu:(B,m,f)=>{if(B.hit(m,f,1*kd(m))>0&&!f.dead)f.burn={t:3,p:.10}},
- ego:(B,m,f)=>{B.heal(m,m.max*(.35+hl(m)),'Expansión');m.atk+=Math.round(10*kb(m))},
- venom:(B,m,f)=>{if(f.hp<f.max*.3){B.say(m,'☠️ ¡Ejecución!');B.hurt(f,f.hp)}else B.hit(m,f,1.5*kd(m))},
- mysterio:(B,m,f)=>{if(B.hit(m,f,.8*kd(m))>0&&!f.dead)f.conf=2},
- redskull:(B,m,f)=>{if(B.hit(m,f,1*kd(m))>0&&!f.dead){f.max=Math.max(1,Math.round(f.max*(1-Math.min(.6,.2*kb(m)))));f.hp=Math.min(f.hp,f.max);B.ev.push({k:'hpset',f,hp:f.hp,max:f.max});B.say(f,'HP máx -20%')}},
- ronan:(B,m,f)=>{B.hit(m,f,2.5*kd(m));B.hurt(m,Math.min(m.max*.1,m.hp-1))},
- killmonger:(B,m,f)=>{B.hit(m,f,1.4*kd(m));m.nextCrit=true}
+ /* --- AoE: golpean a TODOS los rivales activos --- */
+ ironman:(B,m,f)=>{const ign=LV(m,[.4,.6,.6,.8,1]),mu=LV(m,[1.2,1.2,1.3,1.5,1.6]);
+  B.live(f.side).forEach(t=>{if(B.hit(m,t,mu,{ign})>0&&!t.dead){if(m.abLvl>=3)t.def=Math.max(0,t.def-3);if(m.abLvl>=5)t.energy=Math.max(0,t.energy-30)}})},
+ thor:(B,m,f)=>{const mu=LV(m,[1.5,1.7,1.9,2.1,2.4]),tt=LV(m,[2,2,3,3,4]),d=LV(m,[15,18,22,26,30]);
+  B.live(f.side).forEach(t=>{if(B.hit(m,t,mu)>0&&!t.dead&&B.dotOk(t))t.shock={t:tt,d,chain:m.abLvl>=5}})},
+ starlord:(B,m,f)=>{const v=LV(m,[1,2,2,3,3]),mu=LV(m,[.55,.5,.6,.55,.65]);
+  for(let i=0;i<v;i++)B.live(f.side).forEach(t=>B.hit(m,t,mu,{cb:(m.abLvl>=5&&i===v-1)?1:0}))},
+ goblin:(B,m,f)=>{const p=LV(m,[.04,.05,.06,.07,.08]);
+  B.live(f.side).forEach(t=>{if(B.hit(m,t,LV(m,[.4,.4,.5,.5,.7]))>0&&!t.dead&&B.dotOk(t)){t.poison=Math.max(t.poison,p);if(m.abLvl>=3)t.antiheal=true}})},
+ dormammu:(B,m,f)=>{const mu=LV(m,[.8,.9,1,1.1,1.2]),tt=LV(m,[3,3,4,4,5]),p=LV(m,[.08,.10,.10,.12,.12]);
+  B.live(f.side).forEach(t=>{if(B.hit(m,t,mu)>0&&!t.dead&&B.dotOk(t))t.burn={t:tt,p,src:m}})},
+ scarlet:(B,m,f)=>{const pc=LV(m,[.2,.25,.3,.35,.4]),hl=LV(m,[.5,.6,.7,.85,1]);let tot=0;
+  B.live(f.side).forEach(t=>{tot+=B.hurt(t,Math.max(1,t.hp*pc));if(m.abLvl>=3&&!t.dead)B.confF(t,1)});
+  B.heal(m,tot*hl,'Robo de vida');if(m.abLvl>=5)B.shield(m,tot*.3)},
+ strange:(B,m,f)=>{B.heal(m,Math.max(0,m.startHp-m.hp)*LV(m,[.5,.65,.8,.9,1]),'⏪ Bucle temporal');
+  B.live(f.side).forEach(t=>{t.energy=0;if(m.abLvl>=2)B.hit(m,t,LV(m,[0,.4,.5,.6,.7]));if(m.abLvl>=3&&!t.dead)B.stunF(t,1)});
+  if(m.abLvl>=5)B.live(m.side).forEach(a=>{if(a!==m)B.heal(a,Math.max(0,(a.startHp||a.max)-a.hp),'⏪ Bucle temporal')})},
+ hawkeye:(B,m,f)=>{const r=m.abLvl>=5?2:1,mu=LV(m,[.7,.75,.8,.85,.9]);
+  for(let i=0;i<r;i++)B.live(f.side).forEach(t=>B.hit(m,t,mu,{ign:m.abLvl>=4?.3:0}))},
+ falcon:(B,m,f)=>{B.live(f.side).forEach(t=>B.hit(m,t,LV(m,[.6,.6,.7,.8,.9])));if(m.abLvl>=5)m.dodgeNext=Math.max(m.dodgeNext,1)},
+ shuri:(B,m,f)=>{const cut=LV(m,[.25,.35,.5,.5,.6]);
+  B.live(f.side).forEach(t=>{if(B.hit(m,t,LV(m,[.7,.75,.8,.9,1]))>0&&!t.dead){
+   if(!t.shCut||m.abLvl>=5){t.shCut=(t.shCut||0)+1;t.def=Math.round(t.def*(1-cut));t.bonusDef=Math.round(t.bonusDef*(1-cut));B.say(t,'🛡️ DEF −'+Math.round(cut*100)+'%')}
+   if(m.abLvl>=3)t.energy=Math.max(0,t.energy-25)}})},
+ mysterio:(B,m,f)=>{B.live(f.side).forEach(t=>{if(B.hit(m,t,LV(m,[.6,.7,.8,.9,1]))>0&&!t.dead){B.confF(t,LV(m,[1,2,2,2,3]));if(m.abLvl>=5)t.energy=Math.max(0,t.energy-30)}})},
+ redskull:(B,m,f)=>{const cut=LV(m,[.10,.12,.15,.18,.20]);
+  B.live(f.side).forEach(t=>{if(B.hit(m,t,LV(m,[.7,.8,.9,1,1.1]))>0&&!t.dead){const old=t.max;t.max=Math.max(1,Math.round(t.max*(1-cut)));t.hp=Math.min(t.hp,t.max);
+   B.ev.push({k:'hpset',f:t,hp:t.hp,max:t.max});B.say(t,'HP máx −'+Math.round(cut*100)+'%');if(m.abLvl>=3)t.def=Math.max(0,t.def-3);if(m.abLvl>=5)B.heal(m,old-t.max,'Absorbe')}})},
+ rocket:(B,m,f)=>{B.live(f.side).forEach(t=>{if(B.hit(m,t,LV(m,[.6,.7,.8,.9,1]))>0&&!t.dead){if(m.abLvl>=3&&B.dotOk(t))t.burn={t:2,p:.03,src:null};if(m.abLvl>=5)B.confF(t,1)}})},
+ ultron:(B,m,f)=>{const mu=LV(m,[.5,.55,.65,.75,.85]);B.live(f.side).forEach(t=>B.hit(m,t,mu))},
+ kang:(B,m,f)=>{B.live(f.side).forEach(t=>{t.energy=0;B.hit(m,t,LV(m,[.8,.9,1,1.1,1.2]));if(!t.dead&&R()<LV(m,[0,0,.5,.7,1]))B.stunF(t,1)});if(m.abLvl>=5)m.energy=Math.min(150,m.energy+60)},
+ /* --- Mono-objetivo: un rival activo al azar --- */
+ antman:(B,m,f)=>{const red=LV(m,[.3,.4,.5,.5,.6]),tg=m.abLvl>=5?B.live(f.side):[f];
+  tg.forEach(t=>{if(B.hit(m,t,LV(m,[.8,.8,.9,1.1,1.1]))>0&&!t.dead){if(!t.shrunk){t.shrunk=1;t.atk=Math.round(t.atk*(1-red));B.say(t,'🐜 ATK −'+Math.round(red*100)+'%')}if(m.abLvl>=3)t.energy=Math.max(0,t.energy-20)}})},
+ america:(B,m,f)=>{B.hit(m,f,LV(m,[1,1.1,1.2,1.3,1.4]));m.dodgeNext=LV(m,[1,1,2,2,2])},
+ spider:(B,m,f)=>{const L=m.abLvl,tg=[f];if(L>=5){const o=B.live(f.side).filter(x=>x!==f);if(o.length)tg.push(o[Math.floor(R()*o.length)])}
+  tg.forEach(t=>{if(B.hit(m,t,LV(m,[1,1.1,1.1,1.2,1.2]))>0&&!t.dead){B.stunF(t,1);if(L>=3&&B.dotOk(t))t.bleed={t:3,p:LV(m,[0,0,.04,.06,.06])}}})},
+ shang:(B,m,f)=>{const n=LV(m,[2,2,3,3,4]),cb=LV(m,[.1,.2,.2,.3,.35]),mu=LV(m,[1,1,.9,1,1.05]);
+  for(let i=0;i<n&&!f.dead;i++)B.hit(m,f,mu,{cb});if(m.abLvl>=4&&!f.dead)B.stunF(f,1)},
+ marvel:(B,m,f)=>{const d=B.hit(m,f,LV(m,[1.5,1.6,1.7,1.8,2])),h=d*LV(m,[.5,.6,.8,1,1]),b=m.hp;B.heal(m,h,'Absorción');
+  if(m.abLvl>=3)B.shield(m,Math.max(0,h-(m.hp-b))*LV(m,[0,0,.5,.5,1]));
+  if(m.abLvl>=4){m.energy=Math.min(150,m.energy+30);f.energy=Math.max(0,f.energy-30)}
+  if(m.abLvl>=5)m.bonusAtk=Math.min(40,m.bonusAtk+8)},
+ nebula:(B,m,f)=>{B.hit(m,f,1);m.boost=LV(m,[2,3,3,4,5]);B.say(m,'💢 Sobrecarga ×'+m.boost)},
+ thanos:(B,m,f)=>{const th=LV(m,[0,0,.12,.18,.25]),d=B.hit(m,f,LV(m,[2.2,2.5,2.8,3.1,3.5]),{noDodge:1}),sp=LV(m,[.3,.4,.5,.6,.7]);
+  B.T[f.side].filter(x=>!x.dead&&!B.slots[f.side].includes(x)).forEach(x=>B.hurt(x,d*sp));
+  if(!f.dead&&th&&f.hp<f.max*th){B.say(m,'🫰 Chasquido');B.hurt(f,f.hp,{true:1})}
+  if(m.abLvl>=5&&!f.dead)f.energy=0},
+ loki:(B,m,f)=>{const a=m.hp/m.max,b=f.hp/f.max;
+  if(m.abLvl>=2&&b<=a)B.hit(m,f,1.2);
+  else{m.hp=Math.max(1,Math.round(b*m.max));f.hp=Math.max(1,Math.round(a*f.max));B.ev.push({k:'hpset',f:m,hp:m.hp,max:m.max},{k:'hpset',f,hp:f.hp,max:f.max});B.say(m,'🔀 Intercambio')}
+  if(m.abLvl>=3&&!f.dead)B.confF(f,1);if(m.abLvl>=4)m.dodgeNext=Math.max(m.dodgeNext,1);
+  if(m.abLvl>=5){m.energy=Math.min(150,m.energy+25);f.energy=Math.max(0,f.energy-25)}},
+ hela:(B,m,f)=>{const d=B.hurt(f,Math.max(1,f.hp*LV(m,[.3,.35,.4,.45,.5])),{true:m.abLvl>=2?1:0});
+  if(d>0&&m.abLvl>=3)B.heal(m,d*LV(m,[0,0,.3,.4,.5]),'Vida robada');
+  if(m.abLvl>=5&&!f.dead&&f.hp<f.max*.2){B.say(m,'💀 Dios de la Muerte');B.hurt(f,f.hp,{true:1})}},
+ venom:(B,m,f)=>{if(f.hp<f.max*LV(m,[.25,.3,.35,.4,.45])){B.say(m,'☠️ ¡Ejecución!');B.hurt(f,f.hp,{true:1});if(m.abLvl>=5)B.heal(m,m.max*.5,'Devora')}
+  else{const d=B.hit(m,f,LV(m,[1.4,1.5,1.6,1.7,1.8]));if(m.abLvl>=3)B.heal(m,d*.3,'Simbionte')}},
+ ronan:(B,m,f)=>{B.hit(m,f,LV(m,[2.2,2.4,2.6,2.8,3]),{ign:m.abLvl>=3?.25:0,noDodge:m.abLvl>=5?1:0});if(m.abLvl>=4&&!f.dead&&R()<.5)B.stunF(f,1);
+  const rc=LV(m,[.12,.1,.08,.05,0]);if(rc)B.hurt(m,Math.min(m.max*rc,m.hp-1),{true:1})},
+ killmonger:(B,m,f)=>{B.hit(m,f,LV(m,[1.2,1.3,1.4,1.5,1.7]));m.nextCrit=m.abLvl>=4?2:1;if(m.abLvl>=5&&f.dead)m.energy=Math.min(150,m.energy+60)}
 };
 
 class Battle{
- constructor(a,b,k){this.k=k||1;this.T={A:a,B:b};a.forEach(f=>f.side='A');b.forEach(f=>f.side='B');this.slots={A:[],B:[]};this.ev=[];this.cur='A';this.over=false;this.winner=null;this.turns=0;this.settle()}
+ constructor(a,b,k){this.k=k||1;this.T={A:a,B:b};a.forEach(f=>f.side='A');b.forEach(f=>f.side='B');this.slots={A:[],B:[]};this.ev=[];this.cur='A';this.over=false;this.winner=null;this.turns=0;
+  [a,b].forEach(team=>team.forEach(f=>{
+   if(has(f,'cap')){if(f.abLvl>=4)f.bonusDef=5;if(f.abLvl>=5)team.forEach(x=>{x.shield=Math.round(x.max*.2)})}
+   if(has(f,'bw')&&f.abLvl>=5)f.nextCrit=1}));
+  this.settle()}
  live(s){return this.slots[s].filter(f=>f&&!f.dead)}
  settle(){['A','B'].forEach(s=>{const sl=this.slots[s];
   for(let i=0;i<this.k;i++){if(!sl[i]||sl[i].dead){const nx=this.T[s].find(f=>!f.dead&&!sl.includes(f));if(nx){sl[i]=nx;if(nx.startHp===undefined)nx.startHp=nx.hp;this.ev.push({k:'enter',f:nx,side:s,slot:i,hp:nx.hp,max:nx.max,en:nx.energy,thr:(nx.abLvl>0?THR[nx.abKind]:0)||0,s:icons(nx)})}}}
   if(!this.T[s].some(f=>!f.dead)){this.over=true;if(!this.winner)this.winner=s==='A'?'B':'A'}})}
  say(f,txt){this.ev.push({k:'txt',f,txt})}
  stEv(f){this.ev.push({k:'st',f,s:icons(f),en:f.energy,thr:(f.abLvl>0?THR[f.abKind]:0)||0})}
- heal(f,amt,txt){amt=Math.round(Math.min(amt,f.max-f.hp));if(amt<=0||f.dead)return;f.hp+=amt;this.ev.push({k:'heal',f,amt,hp:f.hp,max:f.max,txt})}
- hurt(t,amt,o){o=o||{};amt=Math.round(amt);if(t.dead||amt<=0)return 0;t.hp-=amt;
+ /* inmunidades a estados */
+ dotOk(f){return!(has(f,'drax')&&f.abLvl>=3)}
+ confOk(f){return this.dotOk(f)&&!(has(f,'hulk')&&f.abLvl>=5)}
+ stunOk(f){return!(has(f,'drax')||(has(f,'hulk')&&f.abLvl>=5))}
+ stunF(f,n){if(f.dead)return false;if(!this.stunOk(f)){this.say(f,'🛡️ Inmune');return false}f.stun=Math.max(f.stun,n);return true}
+ confF(f,n){if(f.dead)return false;if(!this.confOk(f)){this.say(f,'🛡️ Inmune');return false}f.conf=Math.max(f.conf,n);return true}
+ shield(f,amt){amt=Math.round(Math.min(amt,f.max*.35-f.shield));if(amt<=0||f.dead)return;f.shield+=amt;this.ev.push({k:'txt',f,txt:'🛡️ +'+amt})}
+ heal(f,amt,txt){if(f.antiheal)amt*=.5;amt=Math.round(Math.min(amt,f.max-f.hp));if(amt<=0||f.dead)return;f.hp+=amt;this.ev.push({k:'heal',f,amt,hp:f.hp,max:f.max,txt})}
+ hurt(t,amt,o){o=o||{};amt=Math.round(amt);if(t.dead||amt<=0)return 0;
+  if(t.inv>0&&!o.true){this.say(t,'✨ Invulnerable');return 0}
+  const orig=amt;
+  if(has(t,'drax')&&!o.true)amt=Math.max(1,Math.round(amt*(1-LV(t,[0,.1,.15,.2,.25]))));
+  if(t.shield>0&&!o.true){const a=Math.min(t.shield,amt);t.shield-=a;amt-=a;this.ev.push({k:'txt',f:t,txt:'🛡️ −'+a});if(amt<=0)return orig}
+  t.hp-=amt;
   this.ev.push({k:'dmg',f:t,amt,crit:!!o.crit,hp:Math.max(0,t.hp),max:t.max,dot:!!o.dot});
   if(t.hp<=0){
-   if(has(t,'deadpool')&&!t.used.rev){t.used.rev=1;t.hp=Math.round(t.max*Math.min(1,.6+hl(t)));this.ev.push({k:'heal',f:t,amt:t.hp,hp:t.hp,max:t.max,txt:'¡Resucita!'})}
+   if(has(t,'deadpool')&&!t.used.rev){t.used.rev=1;t.hp=Math.max(1,Math.round(t.max*LV(t,[.4,.55,.7,.85,1])));this.ev.push({k:'heal',f:t,amt:t.hp,hp:t.hp,max:t.max,txt:'¡Resucita!'});
+    const iv=LV(t,[0,0,0,1,2]);if(iv)t.inv=iv+1;if(t.abLvl>=3)t.bonusAtk+=15}
+   else if(has(t,'wolverine')&&t.abLvl>=5&&!t.used.surv){t.used.surv=1;t.hp=1;this.ev.push({k:'heal',f:t,amt:1,hp:1,max:t.max,txt:'¡Sobrevive!'})}
    else{t.hp=0;t.dead=true;this.ev.push({k:'down',f:t})}
-  }else if(has(t,'ultron')&&!t.used.bk&&t.hp<t.max*.3){t.used.bk=1;this.heal(t,t.max*Math.min(1,.4+hl(t)),'Copia de seguridad')}
-  return amt}
+  }else if(has(t,'ultron')){const n=t.used.bk||0,lim=t.abLvl>=5?2:1;
+   if(n<lim&&t.hp<t.max*(n===0?.3:.15)){t.used.bk=n+1;this.heal(t,t.max*LV(t,[.3,.4,.5,.6,.7]),'Copia de seguridad');if(t.abLvl>=3)t.bonusAtk+=12}}
+  return orig}
  hit(me,foe,mult,o){o=o||{};if(me.dead||foe.dead)return 0;
-  if(!o.noDodge){
-   if(has(foe,'vision')&&!foe.used.ph){foe.used.ph=1;this.say(foe,'👁️ Intangible');return 0}
-   if(foe.dodgeNext){foe.dodgeNext=false;this.say(foe,'🌀 ¡Portal!');return 0}
-   let dc=0;if(has(foe,'falcon'))dc=.2*kb(foe);if(has(foe,'daredevil'))dc=.3*kb(foe);
-   if(dc&&R()<Math.min(dc,.6)){this.say(foe,'💨 ¡Esquiva!');return 0}}
-  let cc=0;if(has(me,'hawkeye'))cc+=.25*kb(me);if(has(me,'winter'))cc+=.15*kb(me);cc+=me.critAcc;
-  let crit=false;if(!o.noCrit){crit=me.nextCrit||R()<cc;me.nextCrit=false;if(has(foe,'drax'))crit=false}
-  let m=mult;
-  if(has(me,'moonknight'))m*=1+.6*kb(me)*(1-me.hp/me.max);
-  if(has(me,'punisher'))m*=1+.02*kb(me)*100*(1-me.hp/me.max);
-  if(has(me,'gamora')&&foe.hp<foe.max*.5)m*=1+.3*kb(me);
-  if(has(me,'gorr')&&(foe.team==='Asgard'||foe.team==='Cosmic'))m*=1+.5*kb(me);
-  if(has(me,'abomination')&&me.hp<me.max*.5)m*=1+.4*kb(me);
-  if(has(me,'namor')&&!me.used.first){me.used.first=1;m*=1+.5*kb(me)}
-  if(me.boost>0)m*=1+.5*kb(me);
-  if(crit)m*=2;
-  let d=foe.def+foe.bonusDef,ign=o.ign||0;if(has(me,'okoye'))ign=Math.max(ign,.3*kb(me));d*=1-Math.min(1,ign);
+  if(foe.inv>0){this.say(foe,'✨ Invulnerable');return 0}
+  const L=me.abLvl;
+  if(!o.noDodge&&!(has(me,'daredevil')&&L>=4)){
+   if(has(foe,'vision')&&(foe.used.ph||0)<LV(foe,[1,2,2,3,3])){foe.used.ph=(foe.used.ph||0)+1;this.say(foe,'👁️ Intangible');
+    if(foe.abLvl>=3)this.heal(foe,foe.max*LV(foe,[0,0,.08,.08,.12]),'Fase');
+    if(foe.abLvl>=5&&!o.nc)this.hit(foe,me,1,{nc:1,noDodge:1});
+    return 0}
+   if(foe.dodgeNext>0){foe.dodgeNext--;this.say(foe,'🌀 ¡Portal!');
+    if(has(foe,'america')&&!o.nc){if(foe.abLvl>=4)this.hit(foe,me,.6,{nc:1});if(foe.abLvl>=5)this.stunF(me,1)}
+    return 0}
+   let dc=0;
+   if(has(foe,'falcon'))dc=LV(foe,[.15,.2,.25,.3,.35]);
+   if(has(foe,'daredevil'))dc=LV(foe,[.2,.24,.28,.32,.36]);
+   if(has(foe,'mysterio')&&foe.abLvl>=3)dc=Math.max(dc,.2);
+   if(has(foe,'moonknight')&&foe.abLvl>=5&&foe.hp<foe.max*.25)dc=Math.max(dc,.3);
+   if(dc&&R()<Math.min(dc,.6)){this.say(foe,'💨 ¡Esquiva!');
+    if(!o.nc){if(has(foe,'daredevil')&&foe.abLvl>=3)this.hit(foe,me,LV(foe,[0,0,.5,.5,1]),{nc:1});if(has(foe,'falcon')&&foe.abLvl>=3)this.hit(foe,me,.5,{nc:1})}
+    return 0}}
+  let cc=me.critAcc+(o.cb||0);
+  if(has(me,'hawkeye'))cc+=LV(me,[.15,.2,.25,.3,.35]);
+  if(has(me,'winter'))cc+=LV(me,[.10,.15,.20,.25,.30]);
+  if(has(me,'nebula')&&me.boost>0&&L>=5)cc+=.2;
+  if(has(me,'punisher')&&L>=5&&me.hp<me.max*.2)cc=1;
+  let crit=false;
+  if(!o.noCrit){const forced=me.nextCrit>0;if(forced)me.nextCrit--;crit=forced||R()<cc;if(has(foe,'drax'))crit=false}
+  let m=mult,first=false;
+  if(has(me,'moonknight'))m*=1+LV(me,[.4,.6,.7,.8,1])*(1-me.hp/me.max);
+  if(has(me,'punisher'))m*=1+LV(me,[.02,.024,.028,.032,.036])*100*(1-me.hp/me.max);
+  if(has(me,'gamora')&&foe.hp<foe.max*.5)m*=1+LV(me,[.3,.4,.5,.6,.7]);
+  if(has(me,'gorr')){const s=LV(me,GORR);if(!s||s.includes(foe.team))m*=1+LV(me,[.4,.5,.6,.7,.8])}
+  if(has(me,'abomination')&&me.hp<me.max*LV(me,[.5,.5,.55,.6,.65]))m*=1+LV(me,[.3,.4,.5,.6,.7]);
+  if(has(me,'namor')){if(!me.used.first){me.used.first=1;first=true;m*=1+LV(me,[.5,.7,.9,1.1,1.3])}
+   if(L>=3){me.used.n=(me.used.n||0)+1;if(me.used.n%3===0)m*=1.5}}
+  if(me.boost>0)m*=1+LV(me,[.4,.5,.6,.7,.8]);
+  if(has(me,'mysterio')&&L>=4&&foe.conf>0)m*=1.25;
+  if(crit)m*=has(me,'bw')&&L>=4?2.4:2;
+  let ign=o.ign||0;
+  if(has(me,'okoye'))ign=Math.max(ign,LV(me,[.2,.3,.4,.5,.6]));
+  if(crit&&has(me,'bw')&&L>=3)ign=Math.max(ign,.4);
+  if(crit&&has(me,'winter')&&L>=3)ign=Math.max(ign,.3);
+  if(crit&&has(me,'killmonger')&&L>=3)ign=Math.max(ign,.5);
+  if(has(me,'punisher')&&L>=3&&me.hp<me.max*.5)ign=Math.max(ign,.25);
+  if(has(me,'gamora')&&L>=3&&foe.hp<foe.max*.5)ign=Math.max(ign,.25);
+  let d=foe.def+foe.bonusDef+(has(foe,'abomination')&&foe.abLvl>=3&&foe.hp<foe.max*LV(foe,[.5,.5,.55,.6,.65])?4:0);d=Math.max(0,d)*(1-Math.min(1,ign));
   let dmg=(me.atk+me.bonusAtk)*m*(.9+R()*.2)*100/(100+d*4);
-  if(has(me,'docock'))dmg+=8*kb(me);
-  if(has(me,'bp')&&me.stored>0){dmg+=me.stored;me.stored=0}
+  const flat=has(me,'docock')?LV(me,[6,8,10,12,14]):0;
+  if(flat){dmg+=flat;if(L>=3&&R()<.25){this.say(me,'🐙 Tentáculo extra');dmg+=flat}}
   const dealt=this.hurt(foe,Math.max(1,dmg),{crit});
-  if(has(me,'hulk'))me.bonusAtk=Math.min(40*kb(me),me.bonusAtk+5*kb(me));
-  if(has(foe,'hulk'))foe.bonusAtk=Math.min(40*kb(foe),foe.bonusAtk+5*kb(foe));
-  if(has(me,'cap'))me.bonusDef=Math.min(15*kb(me),me.bonusDef+3);
-  if(has(me,'bw'))me.critAcc+=.10*kb(me);
-  if(has(me,'goblin'))foe.poison=.06*kb(me);
-  if(has(foe,'bp'))foe.stored+=dealt*.25*kb(foe);
+  /* efectos al golpear */
+  if(flat){if(L>=4)me.bonusDef=Math.min(10,me.bonusDef+2);if(L>=5)this.live(foe.side).forEach(x=>{if(x!==foe)this.hurt(x,flat*.6)})}
+  if(has(me,'bp')&&me.stored>0&&!foe.dead){const s=Math.round(me.stored*(L>=5?1.5:1));me.stored=0;this.say(me,'⚡ Descarga');this.hurt(foe,s,{true:1});if(L>=3)this.heal(me,s*.3,'Energía cinética')}
+  const hg=h=>{h.bonusAtk=Math.min(LV(h,[20,35,50,65,80]),h.bonusAtk+LV(h,[5,5,6,7,8]))};
+  if(has(me,'hulk'))hg(me);
+  if(has(foe,'hulk')){hg(foe);if(foe.abLvl>=3)this.heal(foe,foe.max*.02)}
+  if(has(me,'cap'))me.bonusDef=Math.min(LV(me,[9,12,15,18,24]),me.bonusDef+3);
+  if(has(me,'bw'))me.critAcc=Math.min(.7,me.critAcc+LV(me,[.05,.06,.07,.08,.10]));
+  if(has(me,'goblin')&&!foe.dead&&this.dotOk(foe)){foe.poison=Math.max(foe.poison,LV(me,[.03,.04,.05,.06,.07]));if(L>=3)foe.antiheal=true}
+  if(has(foe,'bp'))foe.stored+=dealt*LV(foe,[.2,.3,.4,.5,.6]);
+  if(has(me,'moonknight')&&L>=3&&me.hp<me.max*.5)this.heal(me,dealt*.1,'Khonshu');
+  if(me.boost>0&&has(me,'nebula')&&L>=3)this.heal(me,dealt*.15,'Sobrecarga');
+  if(has(me,'wolverine')&&L>=4&&!foe.dead&&this.dotOk(foe))foe.bleed={t:2,p:.04};
+  if(crit&&has(me,'winter')){if(L>=4)me.bonusAtk=Math.min(24,me.bonusAtk+4);if(L>=5&&R()<.5&&!foe.dead)this.stunF(foe,1)}
+  if(first&&L>=5&&!foe.dead)this.stunF(foe,1);
+  if(has(me,'gamora')&&L>=5&&!foe.dead&&foe.hp<foe.max*.1){this.say(me,'💀 Ejecución');this.hurt(foe,foe.hp,{true:1})}
   if(!foe.dead){
-   if(has(foe,'cap'))this.hurt(me,dealt*.2*kb(foe));
-   if(has(foe,'groot'))this.hurt(me,6*kb(foe));}
+   if(has(foe,'cap'))this.hurt(me,dealt*LV(foe,[.1,.15,.25,.3,.4]));
+   if(has(foe,'drax')&&foe.abLvl>=5)this.hurt(me,dealt*.2);
+   if(has(foe,'groot')){this.hurt(me,LV(foe,[6,9,12,16,20]));if(foe.abLvl>=5&&R()<.25)this.stunF(me,1)}}
   return dealt}
- act(me,foe){
-  if(has(me,'wolverine'))this.heal(me,me.max*(.1+hl(me)),'Regeneración');
-  if(me.shock&&me.shock.t>0){this.hurt(me,me.shock.d,{dot:1});me.shock.t--}
-  if(me.burn&&me.burn.t>0){this.hurt(me,me.max*me.burn.p,{dot:1});me.burn.t--}
+ act(me,foe){this.act0(me,foe);if(me.inv>0&&!me.dead)me.inv--}
+ act0(me,foe){
+  const L=me.abLvl,hadBoost=me.boost>0;
+  if(has(me,'wolverine')){let p=LV(me,[.06,.08,.10,.12,.14]);if(L>=3&&me.hp<me.max*.5)p*=2;this.heal(me,me.max*p,'Regeneración')}
+  if(has(me,'groot')&&L>=3)this.heal(me,me.max*.03,'Savia');
+  if(has(me,'abomination')&&L>=5&&me.hp<me.max*LV(me,[.5,.5,.55,.6,.65]))this.heal(me,me.max*.05,'Regeneración gamma');
+  if(me.shock&&me.shock.t>0){this.hurt(me,me.shock.d,{dot:1});
+   if(me.shock.chain&&!me.dead){const o=this.live(me.side).filter(x=>x!==me);if(o.length)this.hurt(o[Math.floor(R()*o.length)],me.shock.d*.5,{dot:1})}
+   me.shock.t--}
+  if(me.burn&&me.burn.t>0){const dm=me.max*me.burn.p;const real=this.hurt(me,dm,{dot:1});me.burn.t--;
+   if(me.burn.src&&!me.burn.src.dead&&me.burn.src.abLvl>=5)this.heal(me.burn.src,real*.5,'Absorbe llamas')}
+  if(me.bleed&&me.bleed.t>0){this.hurt(me,me.max*me.bleed.p,{dot:1});me.bleed.t--}
   if(me.poison)this.hurt(me,me.max*me.poison,{dot:1});
   if(me.dead)return;
   me.energy=Math.min(150,me.energy+30);
   if(me.stun>0){me.stun--;this.say(me,'💤 Inmovilizado');return}
   if(me.conf>0){me.conf--;if(R()<.5){this.say(me,'😵 Confundido');return}}
   this.ev.push({k:'lunge',f:me});
-  const thr=me.abLvl>0?THR[me.abKind]:0;
+  const thr=L>0?THR[me.abKind]:0;
   if(thr&&me.energy>=thr){me.energy-=thr;this.ev.push({k:'skill',f:me,txt:CH[me.name]?CH[me.name].ab.name:''});SK[me.abId](this,me,foe)}
-  else{this.hit(me,foe,1);if(has(me,'rocket')&&R()<.2*kb(me)&&!foe.dead){this.say(me,'🚀 Disparo extra');this.hit(me,foe,.5)}}
-  if(me.boost>0)me.boost--}
+  else{this.hit(me,foe,1);
+   if(has(me,'rocket')&&R()<LV(me,[.2,.25,.25,.3,.3])&&!foe.dead){this.say(me,'🚀 Disparo extra');this.hit(me,foe,.5)}
+   if(has(me,'okoye')&&R()<LV(me,[0,0,.2,.25,.35])&&!foe.dead){this.say(me,'🔱 Doble golpe');this.hit(me,foe,.6)}}
+  if(hadBoost&&me.boost>0)me.boost--}
  step(){if(this.over)return;const s=this.cur,o=s==='A'?'B':'A';this.turns++;
   for(const me of this.live(s)){if(me.dead||this.over)continue;const foes=this.live(o);if(!foes.length)break;
-   const foe=foes[Math.floor(R()*foes.length)];/* objetivo aleatorio entre los rivales activos */
+   const tn=foes.filter(x=>has(x,'drax')&&x.abLvl>=4);
+   const foe=(tn.length&&R()<.5)?tn[Math.floor(R()*tn.length)]:foes[Math.floor(R()*foes.length)];/* objetivo aleatorio entre los rivales activos */
    this.act(me,foe);this.stEv(me);this.stEv(foe)}
   this.settle();
   if(!this.over&&this.turns>300){const r=x=>this.T[x].reduce((a,f)=>a+f.hp,0)/this.T[x].reduce((a,f)=>a+f.max,0);this.over=true;this.winner=r('A')>r('B')?'A':'B'}
@@ -415,7 +572,7 @@ const PH=[
  {boss:'Hela',title:'Hela — Diosa de la Muerte',mn:['Guerrero Muerto','💀'],pool:['C','B']},
  {boss:'Kang',title:'Kang — El Conquistador',mn:['Soldado Temporal','⏳'],pool:['B','A']},
  {boss:'Dormammu',title:'Dormammu — Señor de la Dimensión Oscura',mn:['Zelote Oscuro','🔥'],pool:['B','A']},
- {boss:'Ego',title:'Ego — El Planeta Viviente',mn:['Soberano Dorado','🛸'],pool:['A','S']},
+ {boss:'Gorr',title:'Gorr — El Carnicero de Dioses',mn:['Monstruo de Sombra','🖤'],pool:['A','S']},
  {boss:'Thanos',title:'Thanos — El Titán Loco (Guantelete)',mn:['Chitauri','👾'],pool:['A','S']}];
 const TOWER_TOTAL=96;
 const phaseRange=p=>{const s=p===1?0:6+(p-2)*10;return[s,s+(p===1?6:10)]};
@@ -425,7 +582,7 @@ function towerM(g){return 1.2+g*.009}
 const cpow=n=>CH[n].hp/4+CH[n].atk*3+CH[n].def*4;
 const REFPW=NAMES.reduce((a,n)=>a+cpow(n),0)/NAMES.length;
 /* Duelo Élite: multiplicadores de HP/ATK por fase (moderados en 3, muy altos en 10) */
-const TW={hy:[.6,.6],eh:[1,1,1.5,1.9,2.3,2.8,3.3,3.8,4.4,5],ea:[1,1,1.2,1.3,1.4,1.5,1.65,1.8,1.9,2],nv:.7,wp:.6,sq:[1,.8,.55],ms:{2:.85,3:.7,4:.6,5:.55},esc:.45,du:[.7,.7,1.3,1.1,1.05,.8,.8,.7,.5,.4],bh:[1.6,1.6,1.6,1.6,1,1,1,1,1,1.6],bs:[1.4,1.1,1.7,.9,.7,.5,.5,.4,.6,.45]};
+const TW={hy:[.6,.6],eh:[1,1,1.5,1.9,2.3,2.8,3.3,3.8,4.4,5],ea:[1,1,1.2,1.3,1.4,1.5,1.65,1.8,1.9,2],nv:.7,wp:.6,sq:[1,.8,.55],ms:{2:.85,3:.7,4:.6,5:.55},esc:.45,du:[.7,.7,1.3,1.1,1.05,.8,.8,.7,.5,.4],bh:[1.6,1.6,1.6,1.6,1.3,1.3,1.3,1.3,1.3,2.3],bs:[1.4,1.1,1.2,.85,.78,.8,.8,.62,.95,1.4]};
 const rint=(r,a,b)=>a+Math.floor(r()*(b-a+1));
 /* Tipo de combate de cada piso (el último de cada fase es siempre el jefe). multi = batalla múltiple (2v2…5v5 según la fase) */
 const PAT={
@@ -474,7 +631,7 @@ function towerReward(F){/* monedas: ~100 por combate normal y ~1000 por jefe (±
  const v=.85+.3*rng(F.g*131+7)();return{coins:Math.round((F.boss?1000:100)*v),frags:(2+Math.floor((F.p-1)/2))*(F.boss?3:1),box:F.boss?3+(F.p>=5?1:0)+(F.p===10?1:0):0}}
 
 /* ===================== TORNEOS ===================== */
-const TDIF={easy:{label:'Fácil',n:4,cost:300,lv0:1,coin:60,fin:900,frag:15,packs:1,ic:'🥉'},normal:{label:'Normal',n:5,cost:600,lv0:2,coin:100,fin:2000,frag:35,packs:2,ic:'🥈'},hard:{label:'Difícil',n:6,cost:1000,lv0:3,coin:160,fin:4000,frag:70,packs:3,ic:'🥇'}};
+const TDIF={easy:{label:'Fácil',n:4,cost:300,lv0:1,ic:'🥉',prize:'2 Sobres Básicos'},normal:{label:'Normal',n:5,cost:600,lv0:2,ic:'🥈',prize:'4 Sobres Básicos'},hard:{label:'Difícil',n:6,cost:1000,lv0:3,ic:'🥇',prize:'1 Cofre de Torneo Especial (3-5 cartas)'}};
 const RN={1:'Final',2:'Semifinal',3:'Cuartos de final',4:'Octavos de final',5:'16avos de final',6:'32avos de final'};
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function enemyTeam(diff,r){const lv=Math.min(10,TDIF[diff].lv0+r);return shuffle(NAMES).slice(0,5).map(n=>({n,lvl:lv}))}
@@ -534,7 +691,9 @@ async function boot(){
  else{sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const{data}=await sb.auth.getSession();if(data.session){USER=data.session.user;await loadCloud();return startApp()}}
  if(localStorage.getItem('mcu_mode')==='local'){let l=null;try{l=JSON.parse(localStorage.getItem(KEY('local')))}catch(e){}S=Object.assign(defState(),l||{});return startApp()}
  $('#auth').classList.remove('hidden')}
-async function startApp(){$('#auth').classList.add('hidden');$('#app').classList.remove('hidden');S.tower=S.tower||{done:0};hdr();navGlow();go('tower');setInterval(tickGifts,1000);
+function fixSave(){const ok=n=>!!CH[n];for(const n of Object.keys(S.col||{}))if(!ok(n))delete S.col[n];S.team=(S.team||[]).filter(ok);
+ if(S.tourn){const bad=[...(S.tourn.team||[]),...(S.tourn.enemy||[])].some(x=>!ok(x.n))||(S.tourn.opts||[]).some(n=>!ok(n));if(bad)S.tourn=null}}
+async function startApp(){$('#auth').classList.add('hidden');$('#app').classList.remove('hidden');S.tower=S.tower||{done:0};fixSave();hdr();navGlow();go('tower');setInterval(tickGifts,1000);
  if(!S.welcome){S.welcome=true;save();await openPacks('welcome',1,'🎁 Sobre de bienvenida','🎁');render()}}
 
 /* ===================== NAVEGACIÓN ===================== */
@@ -551,9 +710,9 @@ function cardEl(n,o){o=o||{};const c=CH[n],t=TIERS[c.tier],e=S.col[n];const lvl=
 
 /* ===================== COLECCIÓN ===================== */
 function setSub(s){CSUB=s;render()}function setFilter(f){CFILTER=f;render()}
-function vCol(){return`<div class="flex gap-2 mb-3"><button class="sub ${CSUB==='col'?'on':''}" onclick="setSub('col')">Mi Colección (${Object.keys(S.col).length}/47)</button><button class="sub ${CSUB==='team'?'on':''}" onclick="setSub('team')">Equipo Activo (${S.team.length}/5)</button></div>`+(CSUB==='col'?colGrid():teamView())}
-function colGrid(){const f=['ALL',...TIER_ORDER].map(t=>`<button class="chip ${CFILTER===t?'on':''}" onclick="setFilter('${t}')">${t==='ALL'?'Todos':TIERS[t].ic+' '+t}</button>`).join('');
- const list=NAMES.filter(n=>CFILTER==='ALL'||CH[n].tier===CFILTER).sort((a,b)=>TIER_ORDER.indexOf(CH[b].tier)-TIER_ORDER.indexOf(CH[a].tier)||(S.col[b]?1:0)-(S.col[a]?1:0));
+function vCol(){return`<div class="flex gap-2 mb-3"><button class="sub ${CSUB==='col'?'on':''}" onclick="setSub('col')">Mi Colección (${Object.keys(S.col).length}/${NAMES.length})</button><button class="sub ${CSUB==='team'?'on':''}" onclick="setSub('team')">Equipo Activo (${S.team.length}/5)</button></div>`+(CSUB==='col'?colGrid():teamView())}
+function colGrid(){const f=['ALL','OWN',...TIER_ORDER].map(t=>`<button class="chip ${CFILTER===t?'on':''}" onclick="setFilter('${t}')">${t==='ALL'?'Todos':t==='OWN'?'✅ Obtenidos':TIERS[t].ic+' '+t}</button>`).join('');
+ const list=NAMES.filter(n=>CFILTER==='ALL'||(CFILTER==='OWN'?!!S.col[n]:CH[n].tier===CFILTER)).sort((a,b)=>TIER_ORDER.indexOf(CH[b].tier)-TIER_ORDER.indexOf(CH[a].tier)||(S.col[b]?1:0)-(S.col[a]?1:0));
  return`<div class="flex gap-1 flex-wrap mb-3">${f}</div><div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">${list.map(n=>`<div onclick="showChar('${n}')">${cardEl(n)}</div>`).join('')}</div>`}
 function pow(n){const e=S.col[n],s=stats(n,e.lvl);return Math.round((s.hp/4+s.atk*3+s.def*4)*(1+.1*e.ab))}
 function teamView(){const slots=[0,1,2,3,4].map(i=>S.team[i]?`<div onclick="rmTeam(${i})">${cardEl(S.team[i],{mini:1})}</div>`:`<div class="slot">+</div>`).join('');
@@ -564,15 +723,16 @@ function togTeam(n){const i=S.team.indexOf(n);if(i>=0)S.team.splice(i,1);else if
 function rmTeam(i){S.team.splice(i,1);save();render()}
 function autoTeam(){S.team=Object.keys(S.col).sort((a,b)=>pow(b)-pow(a)).slice(0,5);save();render()}
 const lvCost=l=>({c:120*l,d:Math.ceil(l/2)});
-const abCost=a=>a===0?{f:10,c:0}:{f:5+5*a,c:250*a};
+const ABC=[{f:20,c:500},{f:40,c:1500},{f:80,c:4000},{f:150,c:8000},{f:300,c:15000}];
+const abCost=a=>ABC[Math.min(4,a)];
 function showChar(n){const c=CH[n],e=S.col[n],t=TIERS[c.tier];
- if(!e)return modal(`<div class="flex justify-end"><button class="chip" onclick="closeModal()">✕</button></div><div class="w-44 mx-auto">${cardEl(n)}</div><div class="text-center mt-3 text-sm text-slate-400">🔒 Aún no lo tienes. Consíguelo en sobres.<br><b>${c.ab.name}</b>: ${c.ab.desc}</div>`);
+ if(!e)return modal(`<div class="flex justify-end"><button class="chip" onclick="closeModal()">✕</button></div><div class="w-44 mx-auto">${cardEl(n)}</div><div class="text-center mt-3 text-sm text-slate-400">🔒 Aún no lo tienes. Consíguelo en sobres.<br><b>${c.ab.name}</b>: ${c.ab.desc}</div><div class="panel mt-3">${c.ab.ev.map((tx,i)=>`<div class="flex gap-1.5 text-[11px] py-0.5 text-slate-400"><span class="w-9 shrink-0 font-black">Nv${i+1}</span><span>${tx}</span></div>`).join('')}</div>`);
  const l=e.lvl,cur=stats(n,l),nx=stats(n,Math.min(10,l+1));const lc=lvCost(l),ac=abCost(e.ab);const A=e.ab;
- const k=`daño ×${(1+.08*Math.max(0,A-1)).toFixed(2)} · curación +${2*Math.max(0,A-1)}% HP · buffs ×${(1+.05*Math.max(0,A-1)).toFixed(2)}`;
+ const evHTML=c.ab.ev.map((tx,i)=>`<div class="flex gap-1.5 text-[11px] py-0.5 ${A===i+1?'text-emerald-300 font-bold':i+1<A?'text-slate-400':'text-slate-500'}"><span class="w-9 shrink-0 font-black">Nv${i+1}${A===i+1?' ✓':''}</span><span>${tx}</span></div>`).join('');
  modal(`<div class="flex justify-between items-center"><div class="font-black" style="color:${t.color}">${t.ic} Tier ${c.tier} · ${c.type==='Hero'?'Héroe':'Villano'} · ${c.team}</div><button class="chip" onclick="closeModal()">✕</button></div>
  <div class="w-40 mx-auto my-3">${cardEl(n)}</div>
  <div class="grid grid-cols-3 gap-2 text-center text-sm mb-3">${['hp','atk','def'].map((s,i)=>`<div class="panel !p-2"><div class="text-[10px] text-slate-400">${['❤️ HP','⚔️ ATK','🛡️ DEF'][i]}</div><b>${cur[s]}</b>${l<10?`<div class="text-[10px] text-emerald-400">→ ${nx[s]}</div>`:''}</div>`).join('')}</div>
- <div class="panel mb-3"><div class="font-black text-amber-300 text-sm">${c.ab.name} <span class="text-[10px] text-slate-400">(${{P:'Pasiva',fast:'Rápida',normal:'Normal',slow:'Lenta'}[c.ab.kind]})</span></div><div class="text-xs mt-1">${c.ab.desc}</div><div class="text-[11px] mt-2 ${A?'text-emerald-400':'text-red-400'}">${A?`Despertar Nv ${A}/5 — ${k}`:'🔒 Habilidad dormida: despiértala para usarla en combate'}</div></div>
+ <div class="panel mb-3"><div class="font-black text-amber-300 text-sm">${c.ab.name} <span class="text-[10px] text-slate-400">(${{P:'Pasiva',fast:'Rápida',normal:'Normal',slow:'Lenta'}[c.ab.kind]})</span></div><div class="text-xs mt-1">${c.ab.desc}</div><div class="text-[11px] mt-2 mb-1 ${A?'text-emerald-400':'text-red-400'}">${A?`Despertar Nv ${A}/5`:'🔒 Habilidad dormida: despiértala para usarla en combate'}</div><div class="border-t border-slate-700 pt-1">${evHTML}</div></div>
  <div class="text-xs text-slate-400 mb-2">Copias sobrantes: <b class="text-white">${e.dupes}</b></div>
  <div class="grid grid-cols-2 gap-2">
   <button class="btn" ${l>=10||S.coins<lc.c||e.dupes<lc.d?'disabled':''} onclick="levelUp('${n}')">⬆️ Nivel ${l}→${Math.min(10,l+1)}<br><span class="text-[10px] font-bold">${l>=10?'MÁX':`🪙${lc.c} + ${lc.d} copia(s)`}</span></button>
@@ -674,25 +834,28 @@ function endBattle(){const ov=$('#battle');ov.classList.add('hidden');ov.classLi
 
 /* ===================== TORNEOS UI ===================== */
 function vTourn(){const t=S.tourn;
- if(!t)return`<div class="text-center mb-3"><div class="text-xl font-black">🏆 Torneos Draft</div><div class="text-xs text-slate-400">Elige 5 luchadores, roba rivales y sube de nivel</div></div><div class="space-y-2">${Object.entries(TDIF).map(([k,d])=>`<div class="panel flex items-center gap-3"><div class="text-4xl">${d.ic}</div><div class="flex-1"><div class="font-black">${d.label} · desde ${RN[d.n]}</div><div class="text-[11px] text-slate-400">${d.n} combates (desde ${RN[d.n]}) · Premio final 🪙${d.fin} + 🧩${d.frag} + ${d.packs} sobre(s)</div></div><button class="btn gold !py-2" ${S.coins<d.cost?'disabled':''} onclick="tStart('${k}')">🪙 ${d.cost}</button></div>`).join('')}</div><div class="text-[11px] text-slate-500 mt-3">Usa luchadores del roster completo (no necesitas tenerlos). El progreso se guarda y puedes reanudarlo.</div>`;
+ if(!t)return`<div class="text-center mb-3"><div class="text-xl font-black">🏆 Torneos Draft</div><div class="text-xs text-slate-400">Elige 5 luchadores, roba rivales y sube de nivel</div></div><div class="space-y-2">${Object.entries(TDIF).map(([k,d])=>`<div class="panel flex items-center gap-3"><div class="text-4xl">${d.ic}</div><div class="flex-1"><div class="font-black">${d.label} · desde ${RN[d.n]}</div><div class="text-[11px] text-slate-400">${d.n} combates (desde ${RN[d.n]}) · Premio final: ${d.prize}</div></div><button class="btn gold !py-2" ${S.coins<d.cost?'disabled':''} onclick="tStart('${k}')">🪙 ${d.cost}</button></div>`).join('')}</div><div class="text-[11px] text-slate-500 mt-3">Usa luchadores del roster completo (no necesitas tenerlos). El progreso se guarda y puedes reanudarlo.</div>`;
  const d=TDIF[t.diff],rn=RN[d.n-t.r];const row=(tm,fn)=>`<div class="grid grid-cols-5 gap-1.5">${tm.map((x,i)=>`<div ${fn?`onclick="${fn}(${i})"`:''}>${cardEl(x.n,{mini:1,lvl:x.lvl})}</div>`).join('')}</div>`;
  const head=`<div class="flex justify-between items-center mb-3"><div><div class="font-black">${d.ic} Torneo ${d.label}</div><div class="text-[11px] text-slate-400">${t.stage==='champ'||t.stage==='out'?'Finalizado':rn+' · '+(t.r+1)+'/'+d.n}</div></div><button class="chip" onclick="tQuit()">Abandonar</button></div>`;
  if(t.stage==='draft')return head+`<div class="panel mb-3"><div class="text-xs font-black mb-2">Tu plantilla (${t.team.length}/5)</div>${t.team.length?row(t.team):'<div class="slot">+</div>'}</div><div class="text-sm font-black mb-2 text-center">Elige tu héroe ${t.team.length+1}/5</div><div class="grid grid-cols-3 gap-2">${t.opts.map(n=>`<div onclick="tPick('${n}')">${cardEl(n,{force:1,lvl:1,noLvl:1})}</div>`).join('')}</div>`;
- if(t.stage==='ready')return head+`<div class="panel mb-3"><div class="text-xs font-black mb-2">Tu equipo</div>${row(t.team)}</div><div class="panel mb-3"><div class="text-xs font-black mb-2 text-red-400">Rival</div>${row(t.enemy)}</div><button class="btn red w-full" onclick="tFight()">⚔️ ¡Luchar ${rn}!</button>`;
+ if(t.stage==='ready')return head+`<div class="panel mb-3"><div class="text-xs font-black mb-1">Tu equipo · orden de combate 1 → 5</div><div class="text-[10px] text-slate-400 mb-2">Toca un héroe y luego otro para intercambiar sus posiciones.</div><div class="grid grid-cols-5 gap-1.5">${t.team.map((x,i)=>`<div class="relative rounded-2xl ${t.ord===i?'ring-2 ring-amber-400':''}" onclick="tReorder(${i})"><div class="absolute -top-1 -left-1 z-10 text-[10px] font-black bg-amber-400 text-black rounded-full w-4 h-4 flex items-center justify-center">${i+1}</div>${cardEl(x.n,{mini:1,lvl:x.lvl})}</div>`).join('')}</div></div><div class="panel mb-3"><div class="text-xs font-black mb-2 text-red-400">Rival</div>${row(t.enemy)}</div><button class="btn red w-full" onclick="tFight()">⚔️ ¡Luchar ${rn}!</button>`;
  if(t.stage==='steal')return head+(t.sel==null?`<div class="text-center font-black mb-1">🎯 ¡Victoria! Roba un luchador rival</div><div class="text-[11px] text-slate-400 text-center mb-2">Conserva su nivel actual</div><div class="grid grid-cols-5 gap-1.5 mb-3">${t.enemy.map((x,i)=>`<div onclick="tSel(${i})" class="${t.team.some(y=>y.n===x.n)?'opacity-30':''}">${cardEl(x.n,{mini:1,lvl:x.lvl})}</div>`).join('')}</div><button class="btn gray w-full" onclick="tSkipSteal()">Saltar</button>`:`<div class="text-center font-black mb-2">¿A quién sustituye ${CH[t.enemy[t.sel].n].emoji} ${t.enemy[t.sel].n}?</div>${row(t.team,'tSwap')}<button class="btn gray w-full mt-3" onclick="tSel(null)">Atrás</button>`);
  if(t.stage==='lvl')return head+`<div class="text-center font-black mb-2">⬆️ Sube +1 nivel a un héroe</div>${row(t.team,'tLvl')}`;
- if(t.stage==='champ')return head+`<div class="panel text-center"><div class="text-5xl">🏆</div><div class="text-xl font-black text-amber-300 my-2">¡CAMPEÓN!</div><div class="text-sm">🪙${d.fin} · 🧩${d.frag} · ${d.packs} sobre(s)</div><button class="btn w-full mt-3" onclick="tQuit(1)">Cerrar torneo</button></div>`;
+ if(t.stage==='champ')return head+`<div class="panel text-center"><div class="text-5xl">🏆</div><div class="text-xl font-black text-amber-300 my-2">¡CAMPEÓN!</div><div class="text-sm">Premio: ${d.prize}</div><button class="btn w-full mt-3" onclick="tQuit(1)">Cerrar torneo</button></div>`;
  return head+`<div class="panel text-center"><div class="text-5xl">💀</div><div class="text-xl font-black text-red-400 my-2">Eliminado en ${RN[d.n-t.r]}</div><button class="btn w-full mt-3" onclick="tQuit(1)">Cerrar torneo</button></div>`}
 function tOpts(){const t=S.tourn,taken=t.team.map(x=>x.n);t.opts=shuffle(NAMES.filter(n=>!taken.includes(n))).slice(0,3)}
 function tStart(k){const d=TDIF[k];if(S.coins<d.cost)return toast('Monedas insuficientes');S.coins-=d.cost;S.tourn={diff:k,r:0,stage:'draft',team:[],opts:[],enemy:null,sel:null};tOpts();save();hdr();render()}
 function tPick(n){const t=S.tourn;t.team.push({n,lvl:1});if(t.team.length>=5){t.stage='ready';t.enemy=enemyTeam(t.diff,0)}else tOpts();save();render()}
 function tQuit(done){if(!done&&!confirm('¿Abandonar el torneo? Perderás la inscripción.'))return;S.tourn=null;save();render()}
-async function tFight(){const t=S.tourn,d=TDIF[t.diff];const A=t.team.map(x=>mkF(x.n,x.lvl,abOf(x.lvl))),E=t.enemy.map(x=>mkF(x.n,x.lvl,abOf(x.lvl)));
+async function tFight(){const t=S.tourn,d=TDIF[t.diff];t.ord=null;const A=t.team.map(x=>mkF(x.n,x.lvl,abOf(x.lvl))),E=t.enemy.map(x=>mkF(x.n,x.lvl,abOf(x.lvl)));
  const w=await runBattle(A,E,`${RN[d.n-t.r]} (${t.r+1}/${d.n})`);endBattle();
- if(w==='A'){S.twins++;S.coins+=d.coin*(t.r+1);hdr();confetti(120);snd('win');
-  if(t.r>=d.n-1){t.stage='champ';S.coins+=d.fin;S.frags+=d.frag;save();hdr();confetti(300);render();await openPacks('basic',d.packs,'Premio del torneo','🏆');render()}
-  else{t.stage='steal';t.sel=null;save();toast('¡Victoria! +'+d.coin*(t.r+1)+' 🪙');render()}}
- else{const c=Math.round(d.coin*t.r/2);S.coins+=c;t.stage='out';save();hdr();snd('lose');toast('Derrota'+(c?' · consuelo +'+c+' 🪙':''));render()}}
+ if(w==='A'){S.twins++;confetti(120);snd('win');
+  if(t.r>=d.n-1){t.stage='champ';save();confetti(300);render();
+   if(t.diff==='hard')await openPacks('special',3+Math.floor(Math.random()*3),'Cofre de Torneo Especial','🧰');
+   else await openPacks('basic',t.diff==='easy'?2:4,'Premio del torneo','🏆');render()}
+  else{t.stage='steal';t.sel=null;save();toast('¡Victoria!');render()}}
+ else{t.stage='out';save();snd('lose');toast('Derrota');render()}}
+function tReorder(i){const t=S.tourn;if(t.ord==null)t.ord=i;else if(t.ord===i)t.ord=null;else{[t.team[t.ord],t.team[i]]=[t.team[i],t.team[t.ord]];t.ord=null}save();render()}
 function tSel(i){const t=S.tourn;if(i!=null&&t.team.some(y=>y.n===t.enemy[i].n))return toast('Ya tienes a ese luchador');t.sel=i;render()}
 function tSwap(i){const t=S.tourn,x=t.enemy[t.sel];t.team[i]={n:x.n,lvl:x.lvl};t.stage='lvl';t.sel=null;save();render()}
 function tSkipSteal(){S.tourn.stage='lvl';save();render()}
