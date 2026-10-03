@@ -434,7 +434,7 @@ const $=s=>document.querySelector(s);
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 let S=null,USER=null,sb=null,TAB='tower',CSUB='col',CFILTER='ALL',BSPEED=1,BSKIP=false,BABORT=false,saveT=null,NEXT=null,AUTHM='login';
 const KEY=u=>'mcu_gacha_'+(u||'local');
-const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{done:0},box:0,nextCoin:Date.now()+3600000,nextPack:Date.now()+8*3600000,tourn:null,sound:true,welcome:false,twins:0});
+const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{done:0},box:0,nextCoin:0,nextPack:0,tourn:null,sound:true,welcome:false,twins:0});
 function score(){let s=S.tower.done*100+S.twins*50;for(const n in S.col){const e=S.col[n];s+=20+e.lvl*10+e.ab*15}return s}
 function save(){if(!S)return;try{localStorage.setItem(KEY(USER&&USER.id),JSON.stringify(S))}catch(e){}if(sb&&USER){clearTimeout(saveT);saveT=setTimeout(cloudSave,2500)}}
 function setSync(t){const e=$('#sync');if(e)e.textContent=t}
@@ -574,7 +574,7 @@ async function towerGo(){const g=S.tower.done;if(g>=TOWER_TOTAL)return;if(!S.tea
  const A=S.team.map(n=>mkF(n,S.col[n].lvl,S.col[n].ab));const w=await runBattle(A,buildEnemies(F),`Fase ${F.p} · Combate ${F.i+1}`);
  if(w==='A'){const rw=towerReward(F);S.tower.done++;S.coins+=rw.coins;S.frags+=rw.frags;if(rw.box)S.box+=rw.box;save();hdr();endBattle();confetti(F.boss?260:120);snd('win');
   result(true,`<div class="text-sm">🪙 +${rw.coins} · 🧩 +${rw.frags}</div>${rw.box?`<div class="mt-2 font-black text-amber-300">¡Fase ${F.p} completada! 📦 Caja de Fase (${rw.box} sobres)</div>`:''}`,rw.box?'📦 Abrir caja':'Continuar',rw.box?()=>openBox():null)}
- else{endBattle();snd('lose');result(false,'<div class="text-sm text-slate-300">Necesitas más héroes en el equipo (mín. 2-3), subirlos de nivel y despertar habilidades.</div>','Volver',null)}}
+ else{endBattle();snd('lose');result(false,'','Volver',null)}}
 async function openBox(){if(S.box<=0)return;const n=S.box;S.box=0;save();await openPacks('tower',n,'Caja de Fase','📦');render()}
 function result(win,html,btn,cb){NEXT=cb;modal(`<div class="text-center"><div class="text-5xl">${win?'🏆':'💀'}</div><div class="text-2xl font-black my-2 ${win?'text-amber-300':'text-red-400'}">${win?'¡VICTORIA!':'DERROTA'}</div>${html}<button class="btn w-full mt-4" onclick="resultNext()">${btn}</button></div>`)}
 function resultNext(){closeModal();const f=NEXT;NEXT=null;if(f)f();else render();render()}
