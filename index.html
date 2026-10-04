@@ -110,8 +110,8 @@ nav button.gift::after{content:"";position:absolute;top:5px;left:calc(50% + 8px)
 /* Sobres */
 .packshake{display:inline-block;animation:pshake .6s infinite;will-change:transform}
 @keyframes pshake{0%,100%{transform:rotate(0)}25%{transform:rotate(calc(var(--amp,8) * -1deg)) scale(calc(1 + var(--amp,8) * .008))}75%{transform:rotate(calc(var(--amp,8) * 1deg)) scale(calc(1 + var(--amp,8) * .008))}}
-.pk-aura{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;pointer-events:none;animation:aura 1.2s ease-in forwards}
-@keyframes aura{0%{transform:scale(.3);opacity:0}100%{transform:scale(2.2);opacity:.9}}
+.pk-aura{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;pointer-events:none;opacity:.3;animation:aura 1.2s ease-in forwards}
+@keyframes aura{0%{transform:scale(.3)}100%{transform:scale(2.2)}}
 .pk-shock{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:6px solid var(--c);box-shadow:0 0 40px var(--c),inset 0 0 40px var(--c);pointer-events:none;animation:shock 1s cubic-bezier(.1,.6,.3,1) forwards}
 .pk-shock.b{animation-delay:.18s;border-width:3px}
 @keyframes shock{0%{transform:scale(.2);opacity:1}100%{transform:scale(11);opacity:0}}
@@ -127,8 +127,13 @@ nav button.gift::after{content:"";position:absolute;top:5px;left:calc(50% + 8px)
 @keyframes beam{0%{opacity:0;transform:scaleY(.1)}35%{opacity:.9}100%{opacity:0;transform:scaleY(1.2)}}
 .pk-fly{position:absolute;left:50%;top:50%;font-size:44px;margin:-22px 0 0 -22px;pointer-events:none;opacity:0;animation:pkfly .95s cubic-bezier(.2,.7,.3,1) forwards;filter:drop-shadow(0 0 10px var(--c))}
 @keyframes pkfly{0%{opacity:0;transform:translate(0,-10px) scale(.3) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(2.4) rotate(var(--rot))}}
-.flipin{animation:flipin 1.05s cubic-bezier(.2,.9,.25,1);transform-style:preserve-3d;position:relative;z-index:2}
-@keyframes flipin{0%{transform:perspective(900px) rotateY(-420deg) scale(.15);opacity:0;filter:brightness(4) saturate(0)}35%{opacity:1;filter:brightness(2.6)}65%{transform:perspective(900px) rotateY(-22deg) scale(1.16);filter:brightness(1.5)}85%{transform:perspective(900px) rotateY(7deg) scale(.98);filter:brightness(1.1)}100%{transform:perspective(900px) rotateY(0) scale(1);opacity:1;filter:none}}
+.flipin{animation:flipin 1s cubic-bezier(.2,.9,.25,1) both;transform-style:preserve-3d;position:relative;z-index:2;will-change:transform,opacity;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flipin::after{content:"";position:absolute;inset:0;border-radius:14px;background:#fff;opacity:0;pointer-events:none;animation:flipglow 1s ease-out both}
+@keyframes flipglow{0%{opacity:.95}60%{opacity:.25}100%{opacity:0}}
+@keyframes flipin{0%{transform:perspective(900px) rotateY(-420deg) scale(.15) translateZ(0);opacity:0}30%{opacity:1}65%{transform:perspective(900px) rotateY(-22deg) scale(1.16) translateZ(0)}85%{transform:perspective(900px) rotateY(7deg) scale(.98) translateZ(0)}100%{transform:perspective(900px) rotateY(0) scale(1) translateZ(0);opacity:1}}
+#packStage{will-change:transform;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+#packStage .card,.packshake,.pk-chest,.pk-fly,.pk-shock,.pk-burst,.pk-rays,.pk-aura,.pk-beam{will-change:transform,opacity;backface-visibility:hidden}
+#packOv.bigshake{will-change:transform}
 .flashgo{animation:flashgo .8s}
 @keyframes flashgo{0%{opacity:1}100%{opacity:0}}
 .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#0f172a;border:1px solid #facc15;color:#fde68a;padding:8px 16px;border-radius:12px;font-weight:800;font-size:13px;z-index:120;animation:toast 2.2s forwards}
@@ -806,17 +811,19 @@ function packSeq(res,title,icon){return new Promise(done=>{
    stg.innerHTML=`<div class="text-8xl packshake" style="--amp:5;filter:drop-shadow(0 0 20px ${col}77)">${icon}</div>`;hint.textContent=`${title} · ${i+1}/${res.length} — toca para abrir`;snd('open');
    await tap();if(skip)break;
    const p=stg.firstChild;stg.insertAdjacentHTML('afterbegin',`<div class="pk-aura" style="background:radial-gradient(circle,${col}cc 0,transparent 65%)"></div>`);
-   /* carga progresiva: más temblor, más rápido, más brillo */
-   const N=16;for(let k=0;k<=N&&!skip;k++){const t=k/N;p.style.setProperty('--amp',(5+t*t*22).toFixed(1));p.style.animationDuration=(.5-.42*t).toFixed(3)+'s';p.style.filter=`drop-shadow(0 0 ${20+t*90}px ${col}) brightness(${1+t*1.1})`;if(k%4===0)snd('open');await pg(75)}
+   /* carga progresiva: más temblor y más brillo (solo transform/opacity, sin repintados costosos) */
+   {const T0=performance.now(),D=1100;p.style.animationDuration='.22s';p.style.filter=`drop-shadow(0 0 28px ${col})`;let last=0;
+    await new Promise(res=>{const st=now=>{if(skip)return res();const t=Math.min(1,(now-T0)/D);p.style.setProperty('--amp',(5+t*t*22).toFixed(1));const au=stg.firstChild;if(au&&au.classList.contains('pk-aura'))au.style.opacity=(.3+t*.7).toFixed(2);const q=Math.floor(t*4);if(q>last){last=q;snd('open')}t<1?requestAnimationFrame(st):res()};requestAnimationFrame(st)})}
    if(skip)break;
    if(chest){stg.insertAdjacentHTML('afterbegin',`<div class="pk-beam" style="--c:${col}"></div>`);p.className='text-8xl pk-chest';p.style.cssText=`filter:drop-shadow(0 0 60px ${col}) brightness(1.5)`;
     const fl2=['🎴','✉️','🃏','🎴','✉️','🃏','🎴'];fl2.forEach((e,k)=>{const a=(k/fl2.length)*Math.PI-Math.PI,tx=Math.cos(a)*(90+Math.random()*80),ty=140+Math.random()*130;stg.insertAdjacentHTML('beforeend',`<div class="pk-fly" style="--c:${col};--tx:${tx.toFixed(0)}px;--ty:${ty.toFixed(0)}px;--rot:${(Math.random()*600-300).toFixed(0)}deg;animation-delay:${k*70}ms">${e}</div>`)});
-    snd('open');await pg(950);if(skip)break}
-   else{snd('open');await pg(150);if(skip)break}
+    snd('open');await pg(780);if(skip)break}
+   else{snd('open');if(skip)break}
    fl.style.background=`radial-gradient(circle,${col} 0,transparent 70%)`;fl.classList.remove('flashgo');void fl.offsetWidth;fl.classList.add('flashgo');snd(hi?'rare':'flip');
-   stg.innerHTML=`<div class="pk-rays" style="--c:${col};${hi?'':'opacity:.3'}"></div><div class="pk-burst" style="--c:${col}"></div>${hi?`<div class="pk-shock" style="--c:${col}"></div><div class="pk-shock b" style="--c:#fff"></div>`:''}<div class="flipin mx-auto" style="width:190px">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}</div><div class="mt-3 font-black ${r.isNew?'text-emerald-400':'text-slate-300'}" style="position:relative;z-index:2">${r.isNew?'✨ ¡NUEVO!':'Duplicado (+1 copia)'}</div>`;
-   if(hi){await pg(420);ov.classList.remove('bigshake');void ov.offsetWidth;ov.classList.add('bigshake');setTimeout(()=>ov.classList.remove('bigshake'),800);if(navigator.vibrate)try{navigator.vibrate(c.tier==='S'?[60,40,90]:[50])}catch(e){}}
-   if(hi)confetti(c.tier==='S'?180:80);hint.textContent=i<res.length-1?'Toca para continuar':'Toca para ver el resumen';
+   ov.classList.remove('bigshake');stg.innerHTML='';await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));if(skip)break;
+   stg.innerHTML=`<div class="pk-rays" style="--c:${col};${hi?'':'opacity:.3'}"></div><div class="pk-burst" style="--c:${col}"></div>${hi?`<div class="pk-shock" style="--c:${col}"></div><div class="pk-shock b" style="--c:#fff"></div>`:''}<div class="flipin mx-auto" style="width:190px;transform:translateZ(0)">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}</div><div class="mt-3 font-black ${r.isNew?'text-emerald-400':'text-slate-300'}" style="position:relative;z-index:2">${r.isNew?'✨ ¡NUEVO!':'Duplicado (+1 copia)'}</div>`;
+   if(hi){confetti(c.tier==='S'?180:80);await pg(420);ov.classList.remove('bigshake');void ov.offsetWidth;ov.classList.add('bigshake');setTimeout(()=>ov.classList.remove('bigshake'),800);if(navigator.vibrate)try{navigator.vibrate(c.tier==='S'?[60,40,90]:[50])}catch(e){}}
+   hint.textContent=i<res.length-1?'Toca para continuar':'Toca para ver el resumen';
    await tap()}
   stg.innerHTML=`<div class="text-lg font-black mb-3">Resumen</div><div class="grid grid-cols-3 gap-2 w-[min(92vw,420px)] max-h-[60dvh] overflow-y-auto p-1">${res.map(r=>`<div class="relative">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}${r.isNew?'<div class="absolute -top-1 -right-1 text-[9px] font-black bg-emerald-500 text-black px-1.5 rounded-full z-10">NEW</div>':''}</div>`).join('')}</div><button id="pkOk" class="btn mt-4">Aceptar</button>`;hint.textContent='';
   $('#pkOk').onclick=e=>{e.stopPropagation();ov.classList.add('hidden');ov.classList.remove('flex');ov.onclick=null;hdr();done()}})()})}
