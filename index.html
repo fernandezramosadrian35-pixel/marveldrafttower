@@ -108,10 +108,27 @@ nav button.gift::after{content:"";position:absolute;top:5px;left:calc(50% + 8px)
 .fall{animation:fall .5s forwards}
 @keyframes fall{to{opacity:.25;transform:scale(.85) rotate(-6deg);filter:grayscale(1)}}
 /* Sobres */
-.packshake{display:inline-block;animation:pshake .6s infinite}
-@keyframes pshake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg) scale(1.05)}75%{transform:rotate(8deg) scale(1.05)}}
-.flipin{animation:flipin .85s cubic-bezier(.2,.8,.2,1)}
-@keyframes flipin{0%{transform:rotateY(540deg) scale(.2);opacity:0}100%{transform:rotateY(0) scale(1);opacity:1}}
+.packshake{display:inline-block;animation:pshake .6s infinite;will-change:transform}
+@keyframes pshake{0%,100%{transform:rotate(0)}25%{transform:rotate(calc(var(--amp,8) * -1deg)) scale(calc(1 + var(--amp,8) * .008))}75%{transform:rotate(calc(var(--amp,8) * 1deg)) scale(calc(1 + var(--amp,8) * .008))}}
+.pk-aura{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;pointer-events:none;animation:aura 1.2s ease-in forwards}
+@keyframes aura{0%{transform:scale(.3);opacity:0}100%{transform:scale(2.2);opacity:.9}}
+.pk-shock{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:6px solid var(--c);box-shadow:0 0 40px var(--c),inset 0 0 40px var(--c);pointer-events:none;animation:shock 1s cubic-bezier(.1,.6,.3,1) forwards}
+.pk-shock.b{animation-delay:.18s;border-width:3px}
+@keyframes shock{0%{transform:scale(.2);opacity:1}100%{transform:scale(11);opacity:0}}
+.pk-burst{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#fff 0,var(--c) 22%,transparent 68%);animation:burst 1s ease-out forwards;mix-blend-mode:screen}
+@keyframes burst{0%{transform:scale(.1);opacity:1}60%{opacity:.85}100%{transform:scale(2.6);opacity:0}}
+.pk-rays{position:absolute;left:50%;top:50%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,var(--c) 0 6deg,transparent 6deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 68%);mask-image:radial-gradient(circle,#000 0,transparent 68%);opacity:.55;animation:rays 6s linear infinite,raysin .8s ease-out}
+@keyframes rays{to{transform:rotate(360deg)}}@keyframes raysin{from{opacity:0;scale:.2}}
+.bigshake{animation:bigshake .7s}
+@keyframes bigshake{0%,100%{transform:translate(0)}10%{transform:translate(-14px,8px) rotate(-.6deg)}25%{transform:translate(12px,-10px) rotate(.5deg)}40%{transform:translate(-10px,-7px)}55%{transform:translate(9px,8px) rotate(-.3deg)}70%{transform:translate(-5px,4px)}85%{transform:translate(3px,-3px)}}
+.pk-chest{display:inline-block;transform-origin:50% 90%;animation:chestopen .9s cubic-bezier(.2,1.4,.4,1) forwards}
+@keyframes chestopen{0%{transform:scale(1) rotateX(0)}25%{transform:scale(.88,.8) translateY(8px)}55%{transform:scale(1.22,1.3) translateY(-34px) rotateX(-22deg)}100%{transform:scale(1.1) translateY(-18px) rotateX(-12deg)}}
+.pk-beam{position:absolute;left:50%;bottom:50%;width:120px;height:320px;margin-left:-60px;pointer-events:none;background:linear-gradient(0deg,var(--c),transparent);clip-path:polygon(38% 100%,62% 100%,100% 0,0 0);opacity:0;animation:beam .9s ease-out forwards;mix-blend-mode:screen}
+@keyframes beam{0%{opacity:0;transform:scaleY(.1)}35%{opacity:.9}100%{opacity:0;transform:scaleY(1.2)}}
+.pk-fly{position:absolute;left:50%;top:50%;font-size:44px;margin:-22px 0 0 -22px;pointer-events:none;opacity:0;animation:pkfly .95s cubic-bezier(.2,.7,.3,1) forwards;filter:drop-shadow(0 0 10px var(--c))}
+@keyframes pkfly{0%{opacity:0;transform:translate(0,-10px) scale(.3) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(2.4) rotate(var(--rot))}}
+.flipin{animation:flipin 1.05s cubic-bezier(.2,.9,.25,1);transform-style:preserve-3d;position:relative;z-index:2}
+@keyframes flipin{0%{transform:perspective(900px) rotateY(-420deg) scale(.15);opacity:0;filter:brightness(4) saturate(0)}35%{opacity:1;filter:brightness(2.6)}65%{transform:perspective(900px) rotateY(-22deg) scale(1.16);filter:brightness(1.5)}85%{transform:perspective(900px) rotateY(7deg) scale(.98);filter:brightness(1.1)}100%{transform:perspective(900px) rotateY(0) scale(1);opacity:1;filter:none}}
 .flashgo{animation:flashgo .8s}
 @keyframes flashgo{0%{opacity:1}100%{opacity:0}}
 .toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#0f172a;border:1px solid #facc15;color:#fde68a;padding:8px 16px;border-radius:12px;font-weight:800;font-size:13px;z-index:120;animation:toast 2.2s forwards}
@@ -217,7 +234,7 @@ input{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10p
 <!-- ===== SOBRES ===== -->
 <div id="packOv" class="hidden fixed inset-0 z-[85] items-center justify-center flex-col" style="background:#000e">
   <div id="flash" class="absolute inset-0 pointer-events-none opacity-0"></div>
-  <div id="packStage" class="relative text-center" style="perspective:900px"></div>
+  <div id="packStage" class="relative text-center" style="perspective:900px;min-height:230px"></div>
   <div id="packHint" class="mt-5 text-sm text-slate-300 font-bold"></div>
   <button id="packSkip" class="absolute top-3 right-3 chip">Saltar ⏭</button>
 </div>
@@ -663,7 +680,7 @@ function towerReward(F){/* monedas: ~100 por combate normal y ~1000 por jefe (±
  const v=.85+.3*rng(F.g*131+7)();return{coins:Math.round((F.boss?1000:100)*v),frags:(2+Math.floor((F.p-1)/2))*(F.boss?3:1),box:F.boss?3+(F.p>=5?1:0)+(F.p===10?1:0):0}}
 
 /* ===================== TORNEOS ===================== */
-const TDIF={free:{label:'Desafío Gratuito',title:'Desafío Gratuito',n:5,cost:0,lv0:2,lv:[2,2,3,4,5],ic:'🎟️',prize:'200 🪙 monedas'},easy:{label:'Fácil',n:4,cost:300,lv0:1,ic:'🥉',prize:'2 Sobres Básicos'},normal:{label:'Normal',n:5,cost:600,lv0:2,lv:[2,2,3,4,5],ic:'🥈',prize:'4 Sobres Básicos'},hard:{label:'Difícil',n:6,cost:1000,lv0:2,lv:[2,3,5,6,7,7],ic:'🥇',prize:'1 Cofre de Torneo Especial (3-5 cartas)'}};
+const TDIF={free:{label:'Desafío Gratuito',title:'Desafío Gratuito',n:5,cost:0,lv0:2,lv:[2,2,3,4,5],ic:'🎟️',fr:5,prize:'🪙 200 + 🧩 5'},easy:{label:'Fácil',n:4,cost:300,lv0:1,ic:'🥉',fr:10,prize:'2 Sobres Básicos + 🧩 10'},normal:{label:'Normal',n:5,cost:600,lv0:2,lv:[2,2,3,4,5],ic:'🥈',fr:25,prize:'4 Sobres Básicos + 🧩 25'},hard:{label:'Difícil',n:6,cost:1000,lv0:2,lv:[2,3,5,6,7,7],ic:'🥇',fr:60,prize:'1 Cofre Especial (3-5 cartas) + 🧩 60'}};
 const RN={1:'Final',2:'Semifinal',3:'Cuartos de final',4:'Octavos de final',5:'16avos de final',6:'32avos de final'};
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function enemyTeam(diff,r){const D=TDIF[diff],lv=D.lv?D.lv[r]:Math.min(10,D.lv0+r);return shuffle(NAMES).slice(0,5).map(n=>({n,lvl:lv}))}
@@ -783,13 +800,23 @@ function packSeq(res,title,icon){return new Promise(done=>{
  let skip=false,tapR=null;const tap=()=>new Promise(r=>{tapR=()=>{tapR=null;r()}});
  $('#packSkip').onclick=e=>{e.stopPropagation();skip=true;tapR&&tapR()};ov.onclick=()=>{tapR&&tapR()};
  (async()=>{
-  for(let i=0;i<res.length&&!skip;i++){const r=res[i],c=CH[r.n],col=TIERS[c.tier].color;
-   stg.innerHTML=`<div class="text-8xl packshake" style="filter:drop-shadow(0 0 20px ${col}77)">${icon}</div>`;hint.textContent=`${title} · ${i+1}/${res.length} — toca para abrir`;snd('open');
+  const chest=icon==='🧰'||icon==='📦',pg=n=>new Promise(r=>setTimeout(r,n));
+  for(let i=0;i<res.length&&!skip;i++){const r=res[i],c=CH[r.n],col=TIERS[c.tier].color,hi=c.tier==='S'||c.tier==='A';
+   ov.style.setProperty('--c',col);
+   stg.innerHTML=`<div class="text-8xl packshake" style="--amp:5;filter:drop-shadow(0 0 20px ${col}77)">${icon}</div>`;hint.textContent=`${title} · ${i+1}/${res.length} — toca para abrir`;snd('open');
    await tap();if(skip)break;
-   const p=stg.firstChild;p.style.animationDuration='.12s';p.style.filter=`drop-shadow(0 0 45px ${col})`;snd('open');await wait(750);if(skip)break;
-   fl.style.background=`radial-gradient(circle,${col} 0,transparent 70%)`;fl.classList.remove('flashgo');void fl.offsetWidth;fl.classList.add('flashgo');snd(c.tier==='S'||c.tier==='A'?'rare':'flip');
-   stg.innerHTML=`<div class="flipin mx-auto" style="width:190px">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}</div><div class="mt-3 font-black ${r.isNew?'text-emerald-400':'text-slate-300'}">${r.isNew?'✨ ¡NUEVO!':'Duplicado (+1 copia)'}</div>`;
-   if(c.tier==='S'||c.tier==='A')confetti(c.tier==='S'?180:80);hint.textContent=i<res.length-1?'Toca para continuar':'Toca para ver el resumen';
+   const p=stg.firstChild;stg.insertAdjacentHTML('afterbegin',`<div class="pk-aura" style="background:radial-gradient(circle,${col}cc 0,transparent 65%)"></div>`);
+   /* carga progresiva: más temblor, más rápido, más brillo */
+   const N=16;for(let k=0;k<=N&&!skip;k++){const t=k/N;p.style.setProperty('--amp',(5+t*t*22).toFixed(1));p.style.animationDuration=(.5-.42*t).toFixed(3)+'s';p.style.filter=`drop-shadow(0 0 ${20+t*90}px ${col}) brightness(${1+t*1.1})`;if(k%4===0)snd('open');await pg(75)}
+   if(skip)break;
+   if(chest){stg.insertAdjacentHTML('afterbegin',`<div class="pk-beam" style="--c:${col}"></div>`);p.className='text-8xl pk-chest';p.style.cssText=`filter:drop-shadow(0 0 60px ${col}) brightness(1.5)`;
+    const fl2=['🎴','✉️','🃏','🎴','✉️','🃏','🎴'];fl2.forEach((e,k)=>{const a=(k/fl2.length)*Math.PI-Math.PI,tx=Math.cos(a)*(90+Math.random()*80),ty=140+Math.random()*130;stg.insertAdjacentHTML('beforeend',`<div class="pk-fly" style="--c:${col};--tx:${tx.toFixed(0)}px;--ty:${ty.toFixed(0)}px;--rot:${(Math.random()*600-300).toFixed(0)}deg;animation-delay:${k*70}ms">${e}</div>`)});
+    snd('open');await pg(950);if(skip)break}
+   else{snd('open');await pg(150);if(skip)break}
+   fl.style.background=`radial-gradient(circle,${col} 0,transparent 70%)`;fl.classList.remove('flashgo');void fl.offsetWidth;fl.classList.add('flashgo');snd(hi?'rare':'flip');
+   stg.innerHTML=`<div class="pk-rays" style="--c:${col};${hi?'':'opacity:.3'}"></div><div class="pk-burst" style="--c:${col}"></div>${hi?`<div class="pk-shock" style="--c:${col}"></div><div class="pk-shock b" style="--c:#fff"></div>`:''}<div class="flipin mx-auto" style="width:190px">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}</div><div class="mt-3 font-black ${r.isNew?'text-emerald-400':'text-slate-300'}" style="position:relative;z-index:2">${r.isNew?'✨ ¡NUEVO!':'Duplicado (+1 copia)'}</div>`;
+   if(hi){await pg(420);ov.classList.remove('bigshake');void ov.offsetWidth;ov.classList.add('bigshake');setTimeout(()=>ov.classList.remove('bigshake'),800);if(navigator.vibrate)try{navigator.vibrate(c.tier==='S'?[60,40,90]:[50])}catch(e){}}
+   if(hi)confetti(c.tier==='S'?180:80);hint.textContent=i<res.length-1?'Toca para continuar':'Toca para ver el resumen';
    await tap()}
   stg.innerHTML=`<div class="text-lg font-black mb-3">Resumen</div><div class="grid grid-cols-3 gap-2 w-[min(92vw,420px)] max-h-[60dvh] overflow-y-auto p-1">${res.map(r=>`<div class="relative">${cardEl(r.n,{force:1,lvl:1,noLvl:1})}${r.isNew?'<div class="absolute -top-1 -right-1 text-[9px] font-black bg-emerald-500 text-black px-1.5 rounded-full z-10">NEW</div>':''}</div>`).join('')}</div><button id="pkOk" class="btn mt-4">Aceptar</button>`;hint.textContent='';
   $('#pkOk').onclick=e=>{e.stopPropagation();ov.classList.add('hidden');ov.classList.remove('flex');ov.onclick=null;hdr();done()}})()})}
@@ -801,7 +828,10 @@ const SHOP=[
  {id:'chest1',n:'Cofre Básico',ic:'🧰',p:1000,k:'basic',c:0,d:'3 a 5 sobres básicos'},
  {id:'chest2',n:'Cofre Premium',ic:'👑',p:2800,k:'premium',c:0,d:'3 a 5 sobres premium'}];
 function vShop(){return`<div class="text-center mb-3"><div class="text-xl font-black">🛒 Tienda</div></div><div id="gifts" class="grid grid-cols-2 gap-2 mb-4"></div>
- <div class="text-xs font-black text-slate-400 mb-2">SOBRES Y COFRES</div><div class="space-y-2">${SHOP.map(s=>`<div class="panel flex items-center gap-3"><div class="text-4xl">${s.ic}</div><div class="flex-1"><div class="font-black text-sm">${s.n}</div><div class="text-[11px] text-slate-400">${s.d}</div></div><button class="btn gold !py-2" ${S.coins<s.p?'disabled':''} onclick="buy('${s.id}')">🪙 ${s.p}</button></div>`).join('')}</div>`}
+ <div class="text-xs font-black text-slate-400 mb-2">SOBRES Y COFRES</div><div class="space-y-2 mb-4">${SHOP.map(s=>`<div class="panel flex items-center gap-3"><div class="text-4xl">${s.ic}</div><div class="flex-1"><div class="font-black text-sm">${s.n}</div><div class="text-[11px] text-slate-400">${s.d}</div></div><button class="btn gold !py-2" ${S.coins<s.p?'disabled':''} onclick="buy('${s.id}')">🪙 ${s.p}</button></div>`).join('')}</div>
+ <div class="text-xs font-black text-slate-400 mb-2">FRAGMENTOS</div><div class="space-y-2">${FSHOP.map(s=>`<div class="panel flex items-center gap-3"><div class="text-4xl">${s.ic}</div><div class="flex-1"><div class="font-black text-sm">${s.n}</div><div class="text-[11px] text-slate-400">🧩 ${s.f} fragmentos</div></div><button class="btn gold !py-2" ${S.coins<s.p?'disabled':''} onclick="buyFrags('${s.id}')">🪙 ${s.p.toLocaleString('es-ES')}</button></div>`).join('')}</div>`}
+const FSHOP=[{id:'f10',n:'Bolsa de Fragmentos',ic:'👝',f:10,p:350},{id:'f50',n:'Cofre de Fragmentos',ic:'🧰',f:50,p:1500},{id:'f150',n:'Saco de Fragmentos',ic:'💰',f:150,p:4000}];
+function buyFrags(id){const s=FSHOP.find(x=>x.id===id);if(S.coins<s.p)return toast('Monedas insuficientes');S.coins-=s.p;S.frags+=s.f;save();hdr();snd('win');toast('+'+s.f+' 🧩');render()}
 async function buy(id){const s=SHOP.find(x=>x.id===id);if(S.coins<s.p)return toast('Monedas insuficientes');S.coins-=s.p;hdr();const n=s.c||3+Math.floor(Math.random()*3);await openPacks(s.k,n,s.n,s.ic);render()}
 const fmt=ms=>{const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return`${h?h+'h ':''}${String(m).padStart(2,'0')}m ${String(s%60).padStart(2,'0')}s`};
 function navGlow(){const b=document.querySelector('nav button[data-t="shop"]');if(!b||!S)return;const n=Date.now();b.classList.toggle('gift',n>=S.nextCoin||n>=S.nextPack)}
@@ -915,8 +945,8 @@ function tQuit(done){if(!done&&!confirm(S.tourn&&S.tourn.diff==='free'?'¿Abando
 async function tFight(){const t=S.tourn,d=TDIF[t.diff];t.ord=null;const A=t.team.map(x=>mkF(x.n,x.lvl,abOf(x.lvl))),E=t.enemy.map(x=>mkF(x.n,x.lvl,abOf(x.lvl)));
  const w=await runBattle(A,E,`${RN[d.n-t.r]} (${t.r+1}/${d.n})`);endBattle();
  if(w==='A'){S.twins++;confetti(120);snd('win');
-  if(t.r>=d.n-1){t.stage='champ';save();confetti(300);render();
-   if(t.diff==='free'){S.coins+=200;save();hdr();toast('🪙 +200 monedas');await new Promise(r=>setTimeout(r,900))}
+  if(t.r>=d.n-1){S.frags+=d.fr;t.stage='champ';save();hdr();confetti(300);render();
+   if(t.diff==='free'){S.coins+=200;save();hdr();toast('🪙 +200 · 🧩 +'+d.fr);await new Promise(r=>setTimeout(r,900))}
    else if(t.diff==='hard')await openPacks('special',3+Math.floor(Math.random()*3),'Cofre de Torneo Especial','🧰');
    else await openPacks('basic',t.diff==='easy'?2:4,'Premio del torneo','🏆');render()}
   else{t.stage='steal';t.sel=null;save();toast('¡Victoria!');render()}}
