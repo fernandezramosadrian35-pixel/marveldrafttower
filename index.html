@@ -403,9 +403,9 @@ const abOf=l=>Math.min(5,Math.max(1,l));
 const PROBS={
  welcome:{E:50,D:35,C:15},
  basic:{E:45,D:30,C:15,B:7,A:2.5,S:.5},
- premium:{E:20,D:30,C:28,B:15,A:5.5,S:1.5},
- free:{E:70,C:29,B:1},
- tower:{E:60,C:25,B:14.9,S:.1},
+ premium:{E:10,D:30,C:30,B:19,A:8,S:3},
+ free:{E:45,D:30,C:15,B:7,A:2.5,S:.5},
+ tower:{E:35,D:30,C:20,B:10,A:4,S:1},
  special:{E:32.5,D:30,C:21.5,B:11,A:4,S:1}};
 function rollTier(p){let r=Math.random()*Object.values(p).reduce((a,b)=>a+b,0);for(const k in p){r-=p[k];if(r<=0)return k}return Object.keys(p)[0]}
 function drawCard(p){const l=TIER_LIST[rollTier(p)];return l[Math.floor(Math.random()*l.length)]}
@@ -782,6 +782,7 @@ const TUT=[
  {t:'🦸 Colección y equipo',x:'En <b>Colección</b> guardas todos tus héroes. En <b>Equipo Activo</b> eliges tu escuadrón de hasta <b>5 héroes</b> (tócalos para añadir o quitar) y puedes ordenarlos por nivel o por tier.',sel:'#view .panel',tab:'col',sub:'team'},
  {t:'♟️ Estrategia de filas',x:'En los combates múltiples hay dos filas. La <b>fila delantera</b> recibe los golpes: pon allí a los héroes con mucha vida y defensa. La <b>fila trasera</b> está protegida hasta que cae la delantera: ideal para ataque y apoyo. Los ataques de área ignoran las filas. El orden de tu equipo decide quién va delante y qué oleada sale después.',sel:'#view .panel',tab:'col',sub:'team'},
  {t:'🏰 La Torre del Infinito',x:'En <b>Batalla</b> subes por un mapa en zigzag. Cada círculo es un combate; los nodos grandes con 💀 o 👑 son <b>jefes de fase</b>. Al derrotar a un jefe ganas una <b>Caja de Fase</b> con sobres. Toca el nodo marcado «TÚ» para combatir.',sel:'.tnode.cur',tab:'tower'},
+ {t:'🏆 Torneos Draft',x:'En <b>Torneos</b> eliges 5 héroes de un draft aleatorio (¡no hace falta tenerlos en tu colección!) y combates por rondas. Tras cada victoria puedes <b>robar un héroe</b> al rival y subir de nivel a tu equipo. Al ser campeón ganas <b>monedas, fragmentos y sobres</b>. El <b>Desafío Gratuito</b> no cuesta nada.',sel:'#view .space-y-2',tab:'tourn'},
  {t:'🛒 Tienda y regalos',x:'En la <b>Tienda</b> abres más sobres y cofres, y compras fragmentos con monedas. Arriba reclamas gratis <b>🪙 monedas cada hora</b> y <b>🎁 un sobre cada 8 horas</b>. ¡Vuelve a menudo!',sel:'#gifts',tab:'shop'}];
 let TUTI=0;
 function startTutorial(){TUTI=0;if(!$('#tutDim')){document.body.insertAdjacentHTML('beforeend',`<div id="tutDim"></div><div id="tutBox"></div>`)}tutShow()}
