@@ -733,7 +733,24 @@ const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{do
 function score(){let s=S.tower.done*100+S.twins*50;for(const n in S.col){const e=S.col[n];s+=20+e.lvl*10+e.ab*15}return s}
 function save(){if(!S)return;try{localStorage.setItem(KEY(USER&&USER.id),JSON.stringify(S))}catch(e){}if(sb&&USER){clearTimeout(saveT);saveT=setTimeout(cloudSave,2500)}}
 function setSync(t){const e=$('#sync');if(e)e.textContent=t}
-async function cloudSave(){if(!sb||!USER||!S)return;setSync('☁️ …');const{error}=await sb.from('players').upsert({id:USER.id,username:S.name,data:S,score:score(),tower_done:S.tower.done,updated_at:new Date().toISOString()});setSync(error?'⚠️ sin nube':'☁️ ok')}
+async function cloudSave(){
+  if(!sb||!USER||!S) return;
+  setSync('☁️ …');
+  try{
+    const{error}=await sb.from('players').upsert({id:USER.id,username:S.name,data:S,score:score(),tower_done:S.tower.done,updated_at:new Date().toISOString()});
+    if(error){
+      console.error("Error Supabase:", error);
+      setSync('⚠️ ' + error.message);
+      alert("Error Supabase: " + error.message + " | Código: " + error.code + " | Detalles: " + (error.details || 'ninguno'));
+    }else{
+      setSync('☁️ ok');
+    }
+  }catch(err){
+    console.error("Error inesperado:", err);
+    setSync('⚠️ ' + err.message);
+    alert("Error de red o JS: " + err.message);
+  }
+}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cloudSave()});
 function hdr(){$('#hCoins').textContent='🪙 '+S.coins;$('#hFrags').textContent='🧩 '+S.frags}
 function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2300)}
