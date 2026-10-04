@@ -77,7 +77,10 @@ nav button.gift::after{content:"";position:absolute;top:5px;left:calc(50% + 8px)
 .fcard.hit{animation:hitf .3s}
 @keyframes hitf{25%{transform:translateX(-8px);filter:brightness(2) saturate(2)}60%{transform:translateX(8px)}}
 .strow{display:flex;gap:6px;justify-content:center;width:100%;padding:0 8px}
-.sl{width:var(--cw,168px);flex:none;display:flex;justify-content:center}
+.sl{width:var(--cw,168px);flex:none;display:flex;justify-content:center;position:relative}
+.sl.rf::before,.sl.rb::before{position:absolute;top:-9px;left:50%;transform:translateX(-50%);z-index:3;font-size:8px;font-weight:900;letter-spacing:.05em;padding:0 5px;border-radius:6px;background:#000b;white-space:nowrap}
+.sl.rf::before{content:"🛡️ DELANTE";color:#bae6fd}.sl.rb::before{content:"🏹 DETRÁS";color:#ddd6fe}
+.sl.rb .fcard{transform:scale(.92);opacity:.92}
 .fcard .em{font-size:3rem;line-height:1}
 #battle[data-k="2"] .em{font-size:2.6rem}
 #battle[data-k="3"] .em{font-size:2.1rem}
@@ -169,6 +172,16 @@ input{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10p
 @keyframes youbob{50%{transform:translate(-50%,-4px)}}
 #zb{position:fixed;top:64px;left:50%;z-index:40;max-width:92vw;transform:translate(-50%,-30px);opacity:0;pointer-events:none;padding:9px 16px;border-radius:14px;font-size:13px;font-weight:900;color:#fff;background:#050810ee;border:1px solid var(--g);box-shadow:0 0 22px var(--g),0 8px 20px #000a;text-align:center;transition:.4s}
 #zb span{color:var(--g)}#zb.show{opacity:1;transform:translate(-50%,0)}
+
+#tutDim{position:fixed;inset:0;z-index:70;background:rgba(2,6,16,.72)}
+.tut-hl{z-index:75!important;box-shadow:0 0 0 3px #facc15,0 0 26px 4px #facc15aa!important;border-radius:14px;animation:tutpulse 1.4s ease-in-out infinite}
+.tut-hl:not(.tnode):not(nav){position:relative}header.tut-hl{box-shadow:none!important;animation:none}
+#app header.tut-hl > div:last-child{box-shadow:0 0 0 3px #facc15,0 0 22px 4px #facc15aa;border-radius:12px;padding:2px 8px}
+nav.tut-hl{box-shadow:none!important;animation:none;border-radius:0}
+#tutBox{position:fixed;left:50%;transform:translateX(-50%);z-index:90;width:min(94vw,440px);background:linear-gradient(160deg,#16224a,#0a1022);border:2px solid #facc15;border-radius:18px;padding:14px;box-shadow:0 10px 40px #000c,0 0 24px #facc1555}
+#tutBox.tb-bot{bottom:92px}#tutBox.tb-top{top:62px}
+.tdot{display:block;width:7px;height:7px;border-radius:50%;background:#334155}.tdot.on{background:#facc15}
+@keyframes tutpulse{50%{box-shadow:0 0 0 3px #fde68a,0 0 38px 8px #facc15}}
 </style>
 </head>
 <body>
@@ -478,15 +491,21 @@ const SK={
 };
 
 class Battle{
- constructor(a,b,k){this.k=k||1;this.T={A:a,B:b};a.forEach(f=>f.side='A');b.forEach(f=>f.side='B');this.slots={A:[],B:[]};this.ev=[];this.cur='A';this.over=false;this.winner=null;this.turns=0;
+ constructor(a,b,k,rows){this.k=k||1;this.rows=rows||null;this.wv={A:0,B:0};this.T={A:a,B:b};a.forEach(f=>f.side='A');b.forEach(f=>f.side='B');this.slots={A:[],B:[]};this.ev=[];this.cur='A';this.over=false;this.winner=null;this.turns=0;
   [a,b].forEach(team=>team.forEach(f=>{
    if(has(f,'cap')){if(f.abLvl>=4)f.bonusDef=5;if(f.abLvl>=5)team.forEach(x=>{x.shield=Math.round(x.max*.2)})}
    if(has(f,'bw')&&f.abLvl>=5)f.nextCrit=1}));
   this.settle()}
  live(s){return this.slots[s].filter(f=>f&&!f.dead)}
  settle(){['A','B'].forEach(s=>{const sl=this.slots[s];
-  for(let i=0;i<this.k;i++){if(!sl[i]||sl[i].dead){const nx=this.T[s].find(f=>!f.dead&&!sl.includes(f));if(nx){sl[i]=nx;if(nx.startHp===undefined)nx.startHp=nx.hp;this.ev.push({k:'enter',f:nx,side:s,slot:i,hp:nx.hp,max:nx.max,en:nx.energy,thr:(nx.abLvl>0?THR[nx.abKind]:0)||0,s:icons(nx)})}}}
+  const enter=(nx,i)=>{sl[i]=nx;nx.entered=true;if(nx.startHp===undefined)nx.startHp=nx.hp;this.ev.push({k:'enter',f:nx,side:s,slot:i,hp:nx.hp,max:nx.max,en:nx.energy,thr:(nx.abLvl>0?THR[nx.abKind]:0)||0,s:icons(nx)})};
+  if(this.rows){/* oleadas: el escuadrón activo debe caer entero antes de que salga el siguiente */
+   if(!this.live(s).length){const nx=this.T[s].filter(f=>!f.dead&&!f.entered).slice(0,this.k);
+    if(nx.length){sl.length=0;this.wv[s]++;if(this.wv[s]>1)this.ev.push({k:'wave',side:s,n:this.wv[s],fr:this.rows[s],c:nx.length});nx.forEach((f,i)=>enter(f,i))}}}
+  else for(let i=0;i<this.k;i++){if(!sl[i]||sl[i].dead){const nx=this.T[s].find(f=>!f.dead&&!sl.includes(f));if(nx)enter(nx,i)}}
   if(!this.T[s].some(f=>!f.dead)){this.over=true;if(!this.winner)this.winner=s==='A'?'B':'A'}})}
+ /* objetivos alcanzables: con filas, la fila trasera solo se puede golpear cuando cae la delantera (los ataques de área ignoran esto) */
+ targets(side){const L=this.live(side);if(!this.rows)return L;const fr=this.rows[side],F=this.slots[side].filter((f,i)=>f&&!f.dead&&i<fr);return F.length?F:L}
  say(f,txt){this.ev.push({k:'txt',f,txt})}
  stEv(f){this.ev.push({k:'st',f,s:icons(f),en:f.energy,thr:(f.abLvl>0?THR[f.abKind]:0)||0})}
  /* inmunidades a estados */
@@ -608,14 +627,20 @@ class Battle{
   if(hadBoost&&me.boost>0)me.boost--}
  step(){if(this.over)return;const s=this.cur,o=s==='A'?'B':'A';this.turns++;
   for(const me of this.live(s)){if(me.dead||this.over)continue;const foes=this.live(o);if(!foes.length)break;
-   const tn=foes.filter(x=>has(x,'drax')&&x.abLvl>=4);
-   const foe=(tn.length&&R()<.5)?tn[Math.floor(R()*tn.length)]:foes[Math.floor(R()*foes.length)];/* objetivo aleatorio entre los rivales activos */
+   const pool=this.targets(o),tn=pool.filter(x=>has(x,'drax')&&x.abLvl>=4);
+   const foe=(tn.length&&R()<.5)?tn[Math.floor(R()*tn.length)]:pool[Math.floor(R()*pool.length)];/* objetivo aleatorio entre los rivales activos */
    this.act(me,foe);this.stEv(me);this.stEv(foe)}
   this.settle();
   if(!this.over&&this.turns>300){const r=x=>this.T[x].reduce((a,f)=>a+f.hp,0)/this.T[x].reduce((a,f)=>a+f.max,0);this.over=true;this.winner=r('A')>r('B')?'A':'B'}
   this.cur=o}
 }
 
+/* ===== Filas (delante / detrás) en combates múltiples + IA táctica rival ===== */
+const ROWOPTS={2:[2,1],3:[2,1],5:[3,2]};/* nº de luchadores en la fila delantera permitido por formato */
+const tankScore=f=>f.max*(1+(f.def+f.bonusDef)/12);
+function arrangeEnemies(list,k){const o=[];for(let i=0;i<list.length;i+=k)o.push(...list.slice(i,i+k).sort((a,b)=>tankScore(b)-tankScore(a)));return o}/* en cada oleada, los más resistentes van delante */
+/* IA rival a ciegas: decide su formación SOLO mirando a sus propios integrantes (no conoce ni simula la elección del jugador) */
+function aiFormation(list,k){const w=list.slice(0,k);if(!w.length)return ROWOPTS[k][0];const mx=Math.max(...w.map(tankScore)),tanks=w.filter(f=>tankScore(f)>=.8*mx).length;const[big,small]=ROWOPTS[k];return tanks>=big?big:small}
 /* ===================== TORRE ===================== */
 const PH=[
  {boss:'Red Skull',title:'Red Skull — Maestro de Hydra',mn:['Esbirro de Hydra','🪖'],pool:['E','D']},
@@ -636,7 +661,7 @@ function towerM(g){return 1.2+g*.009}
 const cpow=n=>CH[n].hp/4+CH[n].atk*3+CH[n].def*4;
 const REFPW=NAMES.reduce((a,n)=>a+cpow(n),0)/NAMES.length;
 /* Duelo Élite: multiplicadores de HP/ATK por fase (moderados en 3, muy altos en 10) */
-const TW={hy:[.6,.6],eh:[1,1,1.5,1.9,2.3,2.8,3.3,3.8,4.4,5],ea:[1,1,1.2,1.3,1.4,1.5,1.65,1.8,1.9,2],nv:.7,wp:.6,sq:[1,.8,.55],ms:{2:.85,3:.7,4:.6,5:.55},esc:.45,du:[.7,.7,1.3,1.1,1.05,.8,.8,.7,.5,.4],bh:[1.6,1.6,1.6,1.6,1.3,1.3,1.3,1.3,1.3,2.3],bs:[1.4,1.1,1.2,.85,.78,.8,.8,.62,.95,1.4]};
+const TW={hy:[.6,.6],eh:[1,1,1.5,1.9,2.3,2.8,3.3,3.8,4.4,5],ea:[1,1,1.2,1.3,1.4,1.5,1.65,1.8,1.9,2],nv:.7,wp:.6,sq:[1,.8,.55],ms:{2:.8,3:.62,5:.52},esc:.45,du:[.7,.7,1.3,1.1,1.05,.8,.8,.7,.5,.4],bh:[1.6,1.6,1.6,1.6,1.3,1.3,1.3,1.3,1.3,2.3],bs:[1.4,1.1,1.2,.85,.78,.8,.8,.62,.95,1.4]};
 const rint=(r,a,b)=>a+Math.floor(r()*(b-a+1));
 /* Tipo de combate de cada piso (el último de cada fase es siempre el jefe). multi = batalla múltiple (2v2…5v5 según la fase) */
 const PAT={
@@ -650,7 +675,7 @@ const PAT={
  8:['duel','minions','multi','squad','multi','minions','duel','multi','squad','boss'],
  9:['minions','duel','multi','squad','multi','minions','multi','duel','squad','boss'],
  10:['duel','minions','multi','squad','multi','minions','multi','duel','multi','boss']};
-const FMT=p=>p<=2?1:p<=4?2:p<=6?3:p<=8?4:5; /* luchadores activos por bando en batallas múltiples y de jefe */
+const FMT=p=>p<=2?1:p<=4?2:p<=8?3:5; /* luchadores activos por bando en batallas múltiples y de jefe */
 function towerFight(g){const{p,i}=locate(g);const ph=PH[p-1],r=rng(g*977+13),type=PAT[p][i],boss=type==='boss';
  const m=towerM(g),abL=p===1?0:Math.min(5,1+Math.floor((p-2)/2)),K=FMT(p);
  const pool=ph.pool.flatMap(t=>TIER_LIST[t]).filter(x=>x!==ph.boss);
@@ -672,7 +697,7 @@ function towerFight(g){const{p,i}=locate(g);const ph=PH[p-1],r=rng(g*977+13),typ
   for(let j=0;j<c;j++)en.push(hero({all:m*sm}));title=`Escuadrón (${c})`}
  else if(type==='multi'){/* héroes y esbirros mezclados: 4-5 unidades en 2v2 */
   k=K;const odd=i%2?1:0;
-  const lay={2:odd?'HMHMM':'HMHM',3:odd?'HMHHMM':'HMHHM',4:'HHMHHM',5:'HHHHHM'}[K];
+  const lay={2:odd?'HMHMM':'HMHM',3:odd?'HMHHMM':'HMHHM',5:'HHHHHM'}[K];
   for(const ch of lay)en.push(ch==='H'?hero({all:m*TW.ms[K]}):mn({hp:.9,atk:.95}));
   title=`Batalla ${K} vs ${K}`}
  else{const th=p===10,esc=p<=2?0:p<=4?rint(r,1,2):3+(p%2===0?1:0);k=K;
@@ -704,7 +729,7 @@ const $=s=>document.querySelector(s);
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 let S=null,USER=null,sb=null,TAB='tower',CSUB='col',CFILTER='ALL',TSORT='pow',BSPEED=1,BSKIP=false,BABORT=false,saveT=null,NEXT=null,AUTHM='login';
 const KEY=u=>'mcu_gacha_'+(u||'local');
-const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{done:0},box:0,nextCoin:0,nextPack:0,tourn:null,sound:true,welcome:false,twins:0});
+const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{done:0},box:0,nextCoin:0,nextPack:0,tourn:null,sound:true,welcome:false,tutorialDone:false,twins:0});
 function score(){let s=S.tower.done*100+S.twins*50;for(const n in S.col){const e=S.col[n];s+=20+e.lvl*10+e.ab*15}return s}
 function save(){if(!S)return;try{localStorage.setItem(KEY(USER&&USER.id),JSON.stringify(S))}catch(e){}if(sb&&USER){clearTimeout(saveT);saveT=setTimeout(cloudSave,2500)}}
 function setSync(t){const e=$('#sync');if(e)e.textContent=t}
@@ -748,7 +773,29 @@ async function boot(){
 function fixSave(){const ok=n=>!!CH[n];for(const n of Object.keys(S.col||{}))if(!ok(n))delete S.col[n];S.team=(S.team||[]).filter(ok);
  if(S.tourn){const bad=[...(S.tourn.team||[]),...(S.tourn.enemy||[])].some(x=>!ok(x.n))||(S.tourn.opts||[]).some(n=>!ok(n));if(bad)S.tourn=null}}
 async function startApp(){$('#auth').classList.add('hidden');$('#app').classList.remove('hidden');S.tower=S.tower||{done:0};fixSave();hdr();navGlow();go('tower');setInterval(tickGifts,1000);
- if(!S.welcome){S.welcome=true;save();await openPacks('welcome',1,'🎁 Sobre de bienvenida','🎁');render()}}
+ if(!S.welcome){S.welcome=true;save();await openPacks('welcome',1,'🎁 Sobre de bienvenida','🎁');render()}
+ if(!S.tutorialDone)startTutorial()}
+
+/* ===================== TUTORIAL (ONBOARDING) ===================== */
+const TUT=[
+ {t:'👋 ¡Bienvenido!',x:'Arriba ves tus recursos. <b>🪙 Monedas</b>: sirven para comprar sobres y cofres y para subir de nivel a tus héroes. <b>🧩 Fragmentos</b>: sirven para despertar sus habilidades.',sel:'#app header > div:last-child',tab:'tower'},
+ {t:'🦸 Colección y equipo',x:'En <b>Colección</b> guardas todos tus héroes. En <b>Equipo Activo</b> eliges tu escuadrón de hasta <b>5 héroes</b> (tócalos para añadir o quitar) y puedes ordenarlos por nivel o por tier.',sel:'#view .panel',tab:'col',sub:'team'},
+ {t:'♟️ Estrategia de filas',x:'En los combates múltiples hay dos filas. La <b>fila delantera</b> recibe los golpes: pon allí a los héroes con mucha vida y defensa. La <b>fila trasera</b> está protegida hasta que cae la delantera: ideal para ataque y apoyo. Los ataques de área ignoran las filas. El orden de tu equipo decide quién va delante y qué oleada sale después.',sel:'#view .panel',tab:'col',sub:'team'},
+ {t:'🏰 La Torre del Infinito',x:'En <b>Batalla</b> subes por un mapa en zigzag. Cada círculo es un combate; los nodos grandes con 💀 o 👑 son <b>jefes de fase</b>. Al derrotar a un jefe ganas una <b>Caja de Fase</b> con sobres. Toca el nodo marcado «TÚ» para combatir.',sel:'.tnode.cur',tab:'tower'},
+ {t:'🛒 Tienda y regalos',x:'En la <b>Tienda</b> abres más sobres y cofres, y compras fragmentos con monedas. Arriba reclamas gratis <b>🪙 monedas cada hora</b> y <b>🎁 un sobre cada 8 horas</b>. ¡Vuelve a menudo!',sel:'#gifts',tab:'shop'}];
+let TUTI=0;
+function startTutorial(){TUTI=0;if(!$('#tutDim')){document.body.insertAdjacentHTML('beforeend',`<div id="tutDim"></div><div id="tutBox"></div>`)}tutShow()}
+function tutClear(){document.querySelectorAll('.tut-hl').forEach(e=>e.classList.remove('tut-hl'))}
+function tutShow(){const st=TUT[TUTI];tutClear();
+ if(st.tab&&TAB!==st.tab)go(st.tab);if(st.sub&&CSUB!==st.sub){CSUB=st.sub;render()}
+ const last=TUTI===TUT.length-1;
+ const el=document.querySelector(st.sel);
+ if(el){el.classList.add('tut-hl');const nv=el.closest('nav,header');if(nv)nv.classList.add('tut-hl');if(st.tab==='tower')towerScroll(false);else el.scrollIntoView({block:'center'})}
+ const r=el?el.getBoundingClientRect():null;const top=r&&(r.top+r.height/2)>innerHeight*.5;
+ $('#tutBox').className=top?'tb-top':'tb-bot';
+ $('#tutBox').innerHTML=`<div class="text-[11px] font-black text-amber-300 mb-1">Paso ${TUTI+1} de ${TUT.length}</div><div class="font-black text-base mb-1">${st.t}</div><div class="text-sm text-slate-200 leading-5">${st.x}</div><div class="flex items-center justify-between mt-3 gap-2"><button class="chip" onclick="tutEnd()">Saltar tutorial ⏩</button><div class="flex gap-1">${TUT.map((_,i)=>`<i class="tdot ${i===TUTI?'on':''}"></i>`).join('')}</div><button class="btn !py-2 !px-4" onclick="tutNext()">${last?'¡A jugar!':'Siguiente'}</button></div>`}
+function tutNext(){if(TUTI>=TUT.length-1)return tutEnd();TUTI++;tutShow()}
+function tutEnd(){S.tutorialDone=true;save();tutClear();document.querySelectorAll('nav.tut-hl,header.tut-hl').forEach(e=>e.classList.remove('tut-hl'));const d=$('#tutDim'),b=$('#tutBox');if(d)d.remove();if(b)b.remove();CSUB='col';go('tower')}
 
 /* ===================== NAVEGACIÓN ===================== */
 function go(t){TAB=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));TZ=0;render();$('#view').scrollTop=0;if(t==='tower')towerScroll(false)}
@@ -830,8 +877,8 @@ function packSeq(res,title,icon){return new Promise(done=>{
 
 /* ===================== TIENDA ===================== */
 const SHOP=[
- {id:'basic',n:'Sobre Básico',ic:'📦',p:300,k:'basic',c:1,d:'1 carta · E 45% · D 30% · C 15% · B 7% · A 2.5% · S 0.5%'},
- {id:'premium',n:'Sobre Premium',ic:'🎁',p:900,k:'premium',c:1,d:'1 carta · mejores probabilidades (S 1.5%)'},
+ {id:'basic',n:'Sobre Básico',ic:'📦',p:300,k:'basic',c:1,d:'Contiene 1 carta de héroe o villano'},
+ {id:'premium',n:'Sobre Premium',ic:'🎁',p:900,k:'premium',c:1,d:'Contiene 1 carta con mejores probabilidades de héroes de nivel alto'},
  {id:'chest1',n:'Cofre Básico',ic:'🧰',p:1000,k:'basic',c:0,d:'3 a 5 sobres básicos'},
  {id:'chest2',n:'Cofre Premium',ic:'👑',p:2800,k:'premium',c:0,d:'3 a 5 sobres premium'}];
 function vShop(){return`<div class="text-center mb-3"><div class="text-xl font-black">🛒 Tienda</div></div><div id="gifts" class="grid grid-cols-2 gap-2 mb-4"></div>
@@ -896,13 +943,24 @@ function synText(y){return`${y.n}x ${y.team} (+${Math.round(y.hp*100)}% HP, +${M
 function synBadge(names){const y=synOf(names);return y?`<div class="mb-2 text-[11px] font-black text-emerald-300 bg-emerald-950/60 border border-emerald-500/50 rounded-lg px-2 py-1">🛡️ Sinergia: ${synText(y)}</div>`:`<div class="mb-2 text-[10px] text-slate-500">Sinergia: lleva 3 o 5 héroes de la misma afiliación para activarla.</div>`}
 function applySyn(A,names){const y=synOf(names);if(!y)return A;A.forEach(f=>{if(f.team!==y.team)return;f.max=Math.round(f.max*(1+y.hp));f.hp=f.max;f.atk=Math.round(f.atk*(1+y.atk));f.def+=y.def});return A}
 let PSEL=null;
-function prevTeam(){return`<div class="grid grid-cols-5 gap-1.5">${S.team.map((n,i)=>`<div class="relative rounded-2xl ${PSEL===i?'ring-2 ring-amber-400':''}" onclick="prevSwap(${i})"><div class="absolute -top-1 -left-1 z-10 text-[10px] font-black bg-amber-400 text-black rounded-full w-4 h-4 flex items-center justify-center">${i+1}</div>${cardEl(n,{mini:1})}</div>`).join('')}</div>`}
+let PF=null;
+const isRows=F=>!!F&&F.type==='multi'&&F.k>=2;
+const plFr=k=>{const o=ROWOPTS[k];const v=S.fm&&S.fm[k];return o.includes(v)?v:o[0]};
+const FORMLBL={2:{2:'Paralelo · 2 delante, 0 detrás',1:'En línea · 1 delante, 1 detrás'},3:{2:'2 delante · 1 detrás',1:'1 delante · 2 detrás'},5:{3:'3 delante · 2 detrás',2:'2 delante · 3 detrás'}};
+function prevCard(n,i,tag){return`<div class="relative rounded-2xl ${PSEL===i?'ring-2 ring-amber-400':''}" onclick="prevSwap(${i})"><div class="absolute -top-1 -left-1 z-10 text-[10px] font-black bg-amber-400 text-black rounded-full w-4 h-4 flex items-center justify-center">${i+1}</div>${tag?`<div style="position:absolute;bottom:-5px;left:0;right:0;z-index:10;text-align:center;font-size:8px;font-weight:900;line-height:1.2;color:${tag==='F'?'#bae6fd':'#ddd6fe'}"><span style="padding:0 4px;border-radius:5px;background:#000c">${tag==='F'?'🛡️ DELANTE':'🏹 DETRÁS'}</span></div>`:''}${cardEl(n,{mini:1})}</div>`}
+function prevTeam(){if(!isRows(PF))return`<div class="grid grid-cols-5 gap-1.5">${S.team.map((n,i)=>prevCard(n,i)).join('')}</div>`;
+ const k=PF.k,fr=plFr(k);let o='';for(let w=0;w*k<S.team.length;w++){const g=S.team.slice(w*k,w*k+k);
+  o+=`<div class="text-[10px] font-black ${w?'text-slate-400':'text-amber-300'} mb-1 ${w?'mt-2':''}">${w?'🔄 Oleada '+(w+1)+' (sale al caer la anterior)':'⚔️ Escuadrón inicial'}</div><div class="grid grid-cols-5 gap-1.5 pb-2">${g.map((n,j)=>prevCard(n,w*k+j,j<fr?'F':'B')).join('')}</div>`}return o}
+function prevForm(){if(!isRows(PF))return'';const k=PF.k,fr=plFr(k);return`<div class="panel mb-3"><div class="text-xs font-black mb-1">♟️ Formación (combate múltiple)</div><div class="text-[10px] text-slate-400 mb-2">Los rivales solo pueden golpear a tu fila trasera cuando cae la delantera (salvo ataques de área). El banquillo entra en oleadas completas.</div><div class="grid grid-cols-2 gap-2">${ROWOPTS[k].map(o=>`<button class="chip !py-2 ${fr===o?'on':''}" onclick="setForm(${o})">${FORMLBL[k][o]}</button>`).join('')}</div></div>`}
+function setForm(o){S.fm=S.fm||{};S.fm[PF.k]=o;save();const e=$('#prevTeam');if(e)e.innerHTML=prevTeam();const f=$('#prevForm');if(f)f.innerHTML=prevForm()}
 function prevSwap(i){if(PSEL==null)PSEL=i;else if(PSEL===i)PSEL=null;else{[S.team[PSEL],S.team[i]]=[S.team[i],S.team[PSEL]];PSEL=null;save()}const e=$('#prevTeam');if(e)e.innerHTML=prevTeam()}
-function towerPreview(){PSEL=null;if(!S.team.length)return toast('Equipa al menos 1 héroe en Colección');const F=towerFight(S.tower.done),E=buildEnemies(F),rw=towerReward(F);
- modal(`<div class="flex justify-between"><div class="font-black">Fase ${F.p} · Combate ${F.i+1}</div><button class="chip" onclick="closeModal()">✕</button></div><div class="text-sm text-amber-300 font-bold mb-1">${F.title}</div>${F.k>1?`<div class="text-[11px] text-slate-300 mb-2">⚔️ Formato ${F.k} vs ${F.k}: ${F.k} luchadores activos por bando (${E.length} rivales en total). Los ataques van a un rival activo al azar.</div>`:'<div class="mb-2"></div>'}${S.team.length<F.k?`<div class="text-[11px] text-red-300 mb-2">⚠️ Solo tienes ${S.team.length} héroe(s) en el equipo: el rival pondrá ${F.k} a la vez.</div>`:''}<div class="panel mb-3 max-h-48 overflow-y-auto">${enemyRows(E)}</div>
- <div class="text-xs text-slate-300 mb-3">Recompensa: 🪙${rw.coins} · 🧩${rw.frags}${F.boss?` · 📦 Caja de Fase (${rw.box} sobres)`:''}</div><div class="panel mb-3"><div class="text-xs font-black mb-1">Tu equipo · orden de combate</div><div class="text-[10px] text-slate-400 mb-2">Toca un héroe y luego otro para intercambiar sus posiciones.</div><div id="prevSyn">${synBadge(S.team)}</div><div id="prevTeam">${prevTeam()}</div></div><button class="btn red w-full" onclick="towerGo()">⚔️ ¡COMBATIR!</button>`)}
+function towerPreview(){PSEL=null;PF=null;if(!S.team.length)return toast('Equipa al menos 1 héroe en Colección');const F=towerFight(S.tower.done),E=buildEnemies(F),rw=towerReward(F);PF=F;
+ modal(`<div class="flex justify-between"><div class="font-black">Fase ${F.p} · Combate ${F.i+1}</div><button class="chip" onclick="closeModal()">✕</button></div><div class="text-sm text-amber-300 font-bold mb-1">${F.title}</div>${F.k>1?`<div class="text-[11px] text-slate-300 mb-2">⚔️ Formato ${F.k} vs ${F.k}: ${F.k} luchadores activos por bando (${E.length} rivales en total).${isRows(F)?' El rival organiza sus filas por resistencia, sin conocer tu formación y sus oleadas salen cuando cae el escuadrón activo.':' Los ataques van a un rival activo al azar.'}</div>`:'<div class="mb-2"></div>'}${S.team.length<F.k?`<div class="text-[11px] text-red-300 mb-2">⚠️ Solo tienes ${S.team.length} héroe(s) en el equipo: el rival pondrá ${F.k} a la vez.</div>`:''}<div class="panel mb-3 max-h-48 overflow-y-auto">${enemyRows(E)}</div>
+ <div class="text-xs text-slate-300 mb-3">Recompensa: 🪙${rw.coins} · 🧩${rw.frags}${F.boss?` · 📦 Caja de Fase (${rw.box} sobres)`:''}</div><div id="prevForm">${prevForm()}</div><div class="panel mb-3"><div class="text-xs font-black mb-1">Tu equipo · orden de combate</div><div class="text-[10px] text-slate-400 mb-2">Toca un héroe y luego otro para intercambiar sus posiciones.</div><div id="prevSyn">${synBadge(S.team)}</div><div id="prevTeam">${prevTeam()}</div></div><button class="btn red w-full" onclick="towerGo()">⚔️ ¡COMBATIR!</button>`)}
 async function towerGo(){const g=S.tower.done;if(g>=TOWER_TOTAL)return;if(!S.team.length)return toast('Equipa al menos 1 héroe en Colección');closeModal();const F=towerFight(g);
- const A=applySyn(S.team.map(n=>mkF(n,S.col[n].lvl,S.col[n].ab)),S.team);const w=await runBattle(A,buildEnemies(F),`Fase ${F.p} · Combate ${F.i+1}`,F.k);
+ let A=applySyn(S.team.map(n=>mkF(n,S.col[n].lvl,S.col[n].ab)),S.team),E=buildEnemies(F),rows=null;
+ if(isRows(F)){const k=F.k,frA=plFr(k);E=arrangeEnemies(buildEnemies(F),k);rows={A:frA,B:aiFormation(E,k)}}/* IA rival a ciegas: solo evalúa a sus propios héroes */
+ const w=await runBattle(A,E,`Fase ${F.p} · Combate ${F.i+1}`,F.k,rows);
  if(w==='A'){const rw=towerReward(F);S.tower.done++;S.coins+=rw.coins;S.frags+=rw.frags;if(rw.box)S.box+=rw.box;save();hdr();endBattle();confetti(F.boss?260:120);snd('win');
   result(true,`<div class="text-sm">🪙 +${rw.coins} · 🧩 +${rw.frags}</div>${rw.box?`<div class="mt-2 font-black text-amber-300">¡Fase ${F.p} completada! 📦 Caja de Fase (${rw.box} sobres)</div>`:''}`,rw.box?'📦 Abrir caja':'Continuar',rw.box?()=>openBox():null)}
  else{endBattle();snd('lose');result(false,'','Volver',null)}}
@@ -922,6 +980,7 @@ function bSpeed(){BSPEED=BSPEED===1?2:BSPEED===2?4:1;$('#bSpd').textContent='x'+
 function bFlee(){if(confirm('¿Huir del combate? Contará como derrota.'))BABORT=true}
 async function handle(e){switch(e.k){
  case'enter':{const sl=document.querySelector(`#st${e.side} [data-slot="${e.slot||0}"]`);if(sl)sl.innerHTML=stageHTML(e.f,e.hp,e.max,e.en,e.thr,e.s);const ch=document.querySelector(`#bench${e.side} [data-b="${e.f.uid}"]`);if(ch)ch.classList.add('act');await bsl(e.slot?160:260);break}
+ case'wave':{blog(`🔄 <b>${e.side==='A'?'Tu oleada':'Oleada rival'} ${e.n}</b> entra al campo`);const st=document.querySelectorAll(`#st${e.side} .sl`);st.forEach(el=>{if(!el.querySelector('.fcard'))return;});await bsl(450);break}
  case'lunge':{const el=stageEl(e.f);if(el&&!BSKIP){el.classList.remove('lunge');void el.offsetWidth;el.classList.add('lunge')}await bsl(260);break}
  case'skill':{floatTxt(e.f,'✨ '+e.txt,'sk');blog(`<b>${e.f.label}</b>: ${e.txt}`);await bsl(380);break}
  case'dmg':{setHP(e.f,e.hp,e.max);floatTxt(e.f,(e.crit?'💥 ':'')+'-'+e.amt,e.crit?'crit':'dmg');const el=stageEl(e.f);
@@ -934,10 +993,10 @@ async function handle(e){switch(e.k){
  case'down':{const el=stageEl(e.f);if(el)el.classList.add('fall');blog(`💀 ${e.f.label} cae`);await bsl(350);break}
  case'st':{const s=document.querySelector(`#st${e.f.side} [data-stt="${e.f.uid}"]`);if(s)s.textContent=e.s;const n=document.querySelector(`#st${e.f.side} [data-en="${e.f.uid}"]`);if(n)n.style.width=(e.thr?Math.min(100,e.en/e.thr*100):0)+'%';break}}}
 async function play(evs){for(const e of evs)await handle(e)}
-const slotsHTML=k=>Array.from({length:k},(_,i)=>`<div class="sl" data-slot="${i}"></div>`).join('');
-async function runBattle(a,b,title,k){k=k||1;BSKIP=false;BABORT=false;const B=new Battle(a,b,k);const ov=$('#battle');ov.classList.remove('hidden');ov.classList.add('flex');
+const slotsHTML=(k,fr)=>Array.from({length:k},(_,i)=>`<div class="sl ${fr==null?'':i<fr?'rf':'rb'}" data-slot="${i}"></div>`).join('');
+async function runBattle(a,b,title,k,rows){k=k||1;BSKIP=false;BABORT=false;const B=new Battle(a,b,k,rows);const ov=$('#battle');ov.classList.remove('hidden');ov.classList.add('flex');
  ov.dataset.k=k;ov.style.setProperty('--cw',Math.max(58,Math.min(168,Math.floor((Math.min(innerWidth,900)-24-(k-1)*6)/k)))+'px');
- $('#bTitle').textContent=title;$('#bLog').innerHTML='';$('#benchA').innerHTML=benchHTML(a);$('#benchB').innerHTML=benchHTML(b);$('#stA').innerHTML=slotsHTML(k);$('#stB').innerHTML=slotsHTML(k);$('#bSpd').textContent='x'+BSPEED;
+ $('#bTitle').textContent=title;$('#bLog').innerHTML='';$('#benchA').innerHTML=benchHTML(a);$('#benchB').innerHTML=benchHTML(b);$('#stA').innerHTML=slotsHTML(k,rows&&rows.A);$('#stB').innerHTML=slotsHTML(k,rows&&rows.B);if(rows)blog(`♟️ Formación — Tú: ${rows.A} delante · ${k-rows.A} detrás | Rival: ${rows.B} delante · ${k-rows.B} detrás`);$('#bSpd').textContent='x'+BSPEED;
  await play(B.ev);B.ev=[];
  while(!B.over&&!BABORT){B.step();await play(B.ev);B.ev=[];await bsl(120)}
  if(BABORT)B.winner='B';return B.winner}
