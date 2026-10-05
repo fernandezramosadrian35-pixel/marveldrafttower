@@ -32,6 +32,10 @@ nav button{flex:1;padding:8px 2px 10px;font-size:10px;font-weight:800;color:#647
 nav button span{font-size:20px}
 nav button.on{color:#facc15;text-shadow:0 0 10px #facc1566}
 nav button{position:relative}
+nav button.news{color:#7dd3fc;text-shadow:0 0 10px #38bdf8}
+nav button.news span{display:inline-block;animation:newspulse 1.1s ease-in-out infinite}
+nav button.news::after{content:"";position:absolute;top:5px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:#7dd3fc;box-shadow:0 0 8px 2px #38bdf8;animation:giftdot 1.1s ease-in-out infinite}
+@keyframes newspulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 3px #7dd3fc)}50%{transform:scale(1.25);filter:drop-shadow(0 0 12px #38bdf8) drop-shadow(0 0 22px #7dd3fc)}}
 nav button.gift{color:#fde047;text-shadow:0 0 10px #facc15}
 nav button.gift span{display:inline-block;animation:giftpulse 1.1s ease-in-out infinite}
 nav button.gift::after{content:"";position:absolute;top:5px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px 2px #ef4444;animation:giftdot 1.1s ease-in-out infinite}
@@ -211,7 +215,7 @@ nav.tut-hl{box-shadow:none!important;animation:none;border-radius:0}
 <!-- ===== APP ===== -->
 <div id="app" class="hidden">
   <header class="flex items-center justify-between px-3 py-2 border-b border-slate-800" style="background:#0b1226e6">
-    <div class="font-black text-sm tracking-wide"><span class="text-red-500">MCU</span> GACHA <span id="sync" class="text-[10px] text-slate-500 ml-1"></span></div>
+    <div class="font-black text-sm tracking-wide flex items-center"><button id="hSet" onclick="go('set')" aria-label="Ajustes" style="font-size:20px;margin-right:8px;line-height:1">⚙️</button><span class="text-red-500">MCU</span>&nbsp;GACHA <span id="sync" class="text-[10px] text-slate-500 ml-1"></span></div>
     <div class="flex gap-3 text-sm font-black"><span id="hCoins">🪙 0</span><span id="hFrags">🧩 0</span></div>
   </header>
   <main id="view"></main>
@@ -220,7 +224,7 @@ nav.tut-hl{box-shadow:none!important;animation:none;border-radius:0}
     <button data-t="col" onclick="go('col')"><span>🦸</span>COLECCIÓN</button>
     <button data-t="tower" onclick="go('tower')"><span>⚔️</span>BATALLA</button>
     <button data-t="tourn" onclick="go('tourn')"><span>🏆</span>TORNEOS</button>
-    <button data-t="set" onclick="go('set')"><span>⚙️</span>AJUSTES</button>
+    <button data-t="news" onclick="go('news')"><span>📰</span>NOTICIAS</button>
   </nav>
 </div>
 
@@ -294,7 +298,7 @@ const AB_RAW = [
  ['Thor','thor','Rayo Divino','slow','Descarga que daña y electrocuta a TODOS los rivales activos.',
   ['Daño 150% · electrocuta 2 turnos (15 por turno)','Daño 170% · 18 por turno','Daño 190% · 3 turnos · 22 por turno','Daño 210% · 26 por turno','Daño 240% · 4 turnos · 30 por turno · la descarga salta a otro rival (50%)']],
  ['Hulk','hulk','Furia Desbordada','P','Gana ATK con cada golpe que da o recibe.',
-  ['+5 ATK por golpe (máx. +20)','Máx. +35 ATK','Máx. +50 · +6 por golpe · cada golpe recibido le cura 2% de su vida','Máx. +65 · +7 por golpe','Máx. +80 · +8 por golpe · inmune a aturdimientos y confusión']],
+  ['+5 ATK por golpe (máx. +20)','Máx. +35 ATK','Máx. +50 · +6 por golpe','Máx. +65 · +7 por golpe','Máx. +80 · +8 por golpe · inmune a aturdimientos y confusión']],
  ['Black Widow','bw','Precisión de Asesina','P','Cada ataque aumenta su probabilidad de crítico durante el duelo.',
   ['+5% de crítico por ataque (máx. 70%)','+6% por ataque','+7% por ataque · los críticos ignoran 40% DEF','+8% por ataque · los críticos hacen x2,4','+10% por ataque · el primer ataque del combate es crítico garantizado']],
  ['Hawkeye','hawkeye','Ojo de Halcón','fast','Lluvia de flechas sobre TODOS los rivales activos; además tiene crítico pasivo.',
@@ -309,16 +313,16 @@ const AB_RAW = [
   ['Golpe 80% · ATK del rival −30%','ATK −40%','Golpe 90% · ATK −50% · drena 20 de energía','Golpe 110%','Golpe 110% · ATK −60% · afecta a TODOS los rivales activos']],
  ['Scarlet Witch','scarlet','Estructura de la Realidad','slow','Roba vida a TODOS los rivales activos y se cura con ella.',
   ['Roba 20% de la vida actual de cada rival · se cura 50% de lo robado','25% · cura 60%','30% · cura 70% · los rivales quedan confusos 1 turno','35% · cura 85%','40% · cura 100% · lo que no puede curar se convierte en escudo (30%)']],
- ['Doctor Strange','strange','Bucle Temporal','slow','Retrocede el tiempo: se cura y deja sin energía a TODOS los rivales activos.',
+ ['Doctor Strange','strange','Bucle Temporal','superslow','Retrocede el tiempo: se cura y deja sin energía a TODOS los rivales activos.',
   ['Recupera 50% de la vida perdida · energía de todos los rivales a 0','65% · además golpea a todos al 40%','80% · golpe 50% · aturde 1 turno a todos','90% · golpe 60%','100% · golpe 70% · el equipo activo también recupera su vida perdida']],
  ['Wolverine','wolverine','Células Adaptativas','P','Se regenera al inicio de cada uno de sus turnos.',
-  ['Regenera 6% de su vida por turno','8% por turno','10% · el doble por debajo del 50% de vida','12% · sus garras causan sangrado (4% × 2 turnos)','14% · sobrevive una vez a un golpe mortal con 1 de vida']],
+  ['Regenera 4% de su vida por turno','5% por turno','6.5% · el doble por debajo del 50% de vida','8% por turno','9% · sobrevive una vez a un golpe mortal con 1 de vida']],
  ['Deadpool','deadpool','Factor Curativo Inmortal','P','Resucita al morir por primera vez.',
   ['Resucita con 40% de vida','Con 55%','Con 70% · gana +15 ATK al resucitar','Con 85% · 1 turno de invulnerabilidad tras resucitar','Con 100% · 2 turnos de invulnerabilidad']],
  ['America Chavez','america','Portal Estelar','slow','Golpea y abre un portal que anula ataques del rival.',
   ['Golpe 100% · esquiva el siguiente ataque','Golpe 110%','Golpe 120% · el portal absorbe 2 ataques','Golpe 130% · contraataca (60%) al esquivar por el portal','Golpe 140% · aturde 1 turno al rival que atacó el portal']],
- ['Spider-Man','spider','Inmovilización con Telaraña','fast','Golpea e inmoviliza al rival; evoluciona con veneno y un segundo objetivo.',
-  ['Golpe 100% · inmoviliza 1 turno','Golpe 110%','Golpe 110% · veneno: sangrado 4% × 3 turnos','Golpe 120% · sangrado 6%','Golpe 120% · inmoviliza también a un segundo rival']],
+ ['Spider-Man','spider','Inmovilización con Telaraña','fast','Golpea e inmoviliza al rival; evoluciona con más daño y un segundo objetivo.',
+  ['Golpe 100% · inmoviliza 1 turno','Golpe 110%','Golpe 115%','Golpe 120%','Golpe 120% · inmoviliza también a un segundo rival']],
  ['Daredevil','daredevil','Sentidos Agudizados','P','Probabilidad fija de esquivar cualquier ataque.',
   ['20% de esquiva','24% de esquiva','28% · contraataca (50%) tras esquivar','32% · sus ataques no pueden esquivarse','36% · contraataca al 100%']],
  ['Moon Knight','moonknight','Avatar de Khonshu','P','Cuanto más herido está, más fuerte pega.',
@@ -412,7 +416,7 @@ function drawCard(p){const l=TIER_LIST[rollTier(p)];return l[Math.floor(Math.ran
 
 /* ===================== MOTOR DE COMBATE ===================== */
 let UID=0;
-const THR={fast:60,normal:90,slow:120};
+const THR={fast:60,normal:90,slow:120,superslow:150};
 /* valor de una tabla [Nv1..Nv5] según el nivel de despertar del luchador */
 const LV=(f,a)=>a[Math.max(0,Math.min(4,f.abLvl-1))];
 const has=(f,id)=>f.abLvl>0&&f.abId===id;
@@ -463,7 +467,7 @@ const SK={
   tg.forEach(t=>{if(B.hit(m,t,LV(m,[.8,.8,.9,1.1,1.1]))>0&&!t.dead){if(!t.shrunk){t.shrunk=1;t.atk=Math.round(t.atk*(1-red));B.say(t,'🐜 ATK −'+Math.round(red*100)+'%')}if(m.abLvl>=3)t.energy=Math.max(0,t.energy-20)}})},
  america:(B,m,f)=>{B.hit(m,f,LV(m,[1,1.1,1.2,1.3,1.4]));m.dodgeNext=LV(m,[1,1,2,2,2])},
  spider:(B,m,f)=>{const L=m.abLvl,tg=[f];if(L>=5){const o=B.live(f.side).filter(x=>x!==f);if(o.length)tg.push(o[Math.floor(R()*o.length)])}
-  tg.forEach(t=>{if(B.hit(m,t,LV(m,[1,1.1,1.1,1.2,1.2]))>0&&!t.dead){B.stunF(t,1);if(L>=3&&B.dotOk(t))t.bleed={t:3,p:LV(m,[0,0,.04,.06,.06])}}})},
+  tg.forEach(t=>{if(B.hit(m,t,LV(m,[1,1.1,1.15,1.2,1.2]))>0&&!t.dead){B.stunF(t,1)}})},
  shang:(B,m,f)=>{const n=LV(m,[2,2,3,3,4]),cb=LV(m,[.1,.2,.2,.3,.35]),mu=LV(m,[1,1,.9,1,1.05]);
   for(let i=0;i<n&&!f.dead;i++)B.hit(m,f,mu,{cb});if(m.abLvl>=4&&!f.dead)B.stunF(f,1)},
  marvel:(B,m,f)=>{const d=B.hit(m,f,LV(m,[1.5,1.6,1.7,1.8,2])),h=d*LV(m,[.5,.6,.8,1,1]),b=m.hp;B.heal(m,h,'Absorción');
@@ -585,14 +589,13 @@ class Battle{
   if(has(me,'bp')&&me.stored>0&&!foe.dead){const s=Math.round(me.stored*(L>=5?1.5:1));me.stored=0;this.say(me,'⚡ Descarga');this.hurt(foe,s,{true:1});if(L>=3)this.heal(me,s*.3,'Energía cinética')}
   const hg=h=>{h.bonusAtk=Math.min(LV(h,[20,35,50,65,80]),h.bonusAtk+LV(h,[5,5,6,7,8]))};
   if(has(me,'hulk'))hg(me);
-  if(has(foe,'hulk')){hg(foe);if(foe.abLvl>=3)this.heal(foe,foe.max*.02)}
+  if(has(foe,'hulk')){hg(foe)}
   if(has(me,'cap'))me.bonusDef=Math.min(LV(me,[9,12,15,18,24]),me.bonusDef+3);
   if(has(me,'bw'))me.critAcc=Math.min(.7,me.critAcc+LV(me,[.05,.06,.07,.08,.10]));
   if(has(me,'goblin')&&!foe.dead&&this.dotOk(foe)){foe.poison=Math.max(foe.poison,LV(me,[.03,.04,.05,.06,.07]));if(L>=3)foe.antiheal=true}
   if(has(foe,'bp'))foe.stored+=dealt*LV(foe,[.2,.3,.4,.5,.6]);
   if(has(me,'moonknight')&&L>=3&&me.hp<me.max*.5)this.heal(me,dealt*.1,'Khonshu');
   if(me.boost>0&&has(me,'nebula')&&L>=3)this.heal(me,dealt*.15,'Sobrecarga');
-  if(has(me,'wolverine')&&L>=4&&!foe.dead&&this.dotOk(foe))foe.bleed={t:2,p:.04};
   if(crit&&has(me,'winter')){if(L>=4)me.bonusAtk=Math.min(24,me.bonusAtk+4);if(L>=5&&R()<.5&&!foe.dead)this.stunF(foe,1)}
   if(first&&L>=5&&!foe.dead)this.stunF(foe,1);
   if(has(me,'gamora')&&L>=5&&!foe.dead&&foe.hp<foe.max*.1){this.say(me,'💀 Ejecución');this.hurt(foe,foe.hp,{true:1})}
@@ -604,7 +607,7 @@ class Battle{
  act(me,foe){this.act0(me,foe);if(me.inv>0&&!me.dead)me.inv--}
  act0(me,foe){
   const L=me.abLvl,hadBoost=me.boost>0;
-  if(has(me,'wolverine')){let p=LV(me,[.06,.08,.10,.12,.14]);if(L>=3&&me.hp<me.max*.5)p*=2;this.heal(me,me.max*p,'Regeneración')}
+  if(has(me,'wolverine')){let p=LV(me,[.04,.05,.065,.08,.09]);if(L>=3&&me.hp<me.max*.5)p*=2;this.heal(me,me.max*p,'Regeneración')}
   if(has(me,'groot')&&L>=3)this.heal(me,me.max*.03,'Savia');
   if(has(me,'abomination')&&L>=5&&me.hp<me.max*LV(me,[.5,.5,.55,.6,.65]))this.heal(me,me.max*.05,'Regeneración gamma');
   if(me.shock&&me.shock.t>0){this.hurt(me,me.shock.d,{dot:1});
@@ -729,7 +732,14 @@ const $=s=>document.querySelector(s);
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 let S=null,USER=null,sb=null,TAB='tower',CSUB='col',CFILTER='ALL',TSORT='pow',BSPEED=1,BSKIP=false,BABORT=false,saveT=null,NEXT=null,AUTHM='login';
 const KEY=u=>'mcu_gacha_'+(u||'local');
-const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{done:0},box:0,nextCoin:0,nextPack:0,tourn:null,sound:true,welcome:false,tutorialDone:false,twins:0});
+const PATCHES=[
+ {id:'2026-10-05-1430',title:'Parche 05/10/2026 - 14:30',items:[
+  '🌀 <b>Doctor Strange</b>: su habilidad Bucle Temporal pasa a carga <b>muy lenta</b> (superslow): ahora necesita 150 de energía en lugar de 120.',
+  '🐺 <b>Wolverine</b>: sus ataques ya no causan sangrado. Su regeneración base baja al 4% por turno en Nv1 (5% / 6.5% / 8% / 9% en los siguientes niveles).',
+  '💚 <b>Hulk</b>: ya no se cura al ser golpeado. Mantiene la ganancia de ATK.',
+  '🕸️ <b>Spider-Man</b>: su habilidad ya no aplica veneno/sangrado. Conserva la inmovilización y el aumento de daño.']}
+];
+const defState=()=>({v:1,name:'Jugador',coins:0,frags:0,col:{},team:[],tower:{done:0},box:0,nextCoin:0,nextPack:0,tourn:null,sound:true,welcome:false,tutorialDone:false,twins:0,patchSeen:''});
 function score(){let s=S.tower.done*100+S.twins*50;for(const n in S.col){const e=S.col[n];s+=20+e.lvl*10+e.ab*15}return s}
 function save(){if(!S)return;try{localStorage.setItem(KEY(USER&&USER.id),JSON.stringify(S))}catch(e){}if(sb&&USER){clearTimeout(saveT);saveT=setTimeout(cloudSave,2500)}}
 function setSync(t){const e=$('#sync');if(e)e.textContent=t}
@@ -817,7 +827,7 @@ function tutEnd(){S.tutorialDone=true;save();tutClear();document.querySelectorAl
 
 /* ===================== NAVEGACIÓN ===================== */
 function go(t){TAB=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));TZ=0;render();$('#view').scrollTop=0;if(t==='tower')towerScroll(false)}
-function render(){const v=$('#view');v.innerHTML={tower:vTower,tourn:vTourn,col:vCol,shop:vShop,set:vSet}[TAB]();if(TAB==='shop')tickGifts();if(TAB==='set')loadRanking();if(TAB==='tower'){towerInit();if(!v._tkeep)towerScroll(false)}}
+function render(){const v=$('#view');v.innerHTML={tower:vTower,tourn:vTourn,col:vCol,shop:vShop,set:vSet,news:vNews}[TAB]();if(TAB==='shop')tickGifts();if(TAB==='news'){loadRanking();if(S&&S.patchSeen!==PATCHES[0].id){S.patchSeen=PATCHES[0].id;save();navGlow()}}if(TAB==='tower'){towerInit();if(!v._tkeep)towerScroll(false)}}
 function modal(h){$('#modalBody').innerHTML=h;const m=$('#modal');m.classList.remove('hidden');m.classList.add('flex')}
 function closeModal(){const m=$('#modal');m.classList.add('hidden');m.classList.remove('flex')}
 
@@ -853,7 +863,7 @@ function showChar(n){const c=CH[n],e=S.col[n],t=TIERS[c.tier];
  modal(`<div class="flex justify-between items-center"><div class="font-black" style="color:${t.color}">${t.ic} Tier ${c.tier} · ${c.type==='Hero'?'Héroe':'Villano'} · ${c.team}</div><button class="chip" onclick="closeModal()">✕</button></div>
  <div class="w-40 mx-auto my-3">${cardEl(n)}</div>
  <div class="grid grid-cols-3 gap-2 text-center text-sm mb-3">${['hp','atk','def'].map((s,i)=>`<div class="panel !p-2"><div class="text-[10px] text-slate-400">${['❤️ HP','⚔️ ATK','🛡️ DEF'][i]}</div><b>${cur[s]}</b>${l<10?`<div class="text-[10px] text-emerald-400">→ ${nx[s]}</div>`:''}</div>`).join('')}</div>
- <div class="panel mb-3"><div class="font-black text-amber-300 text-sm">${c.ab.name} <span class="text-[10px] text-slate-400">(${{P:'Pasiva',fast:'Rápida',normal:'Normal',slow:'Lenta'}[c.ab.kind]})</span></div><div class="text-xs mt-1">${c.ab.desc}</div><div class="text-[11px] mt-2 mb-1 ${A?'text-emerald-400':'text-red-400'}">${A?`Despertar Nv ${A}/5`:'🔒 Habilidad dormida: despiértala para usarla en combate'}</div><div class="border-t border-slate-700 pt-1">${evHTML}</div></div>
+ <div class="panel mb-3"><div class="font-black text-amber-300 text-sm">${c.ab.name} <span class="text-[10px] text-slate-400">(${{P:'Pasiva',fast:'Rápida',normal:'Normal',slow:'Lenta',superslow:'Muy lenta'}[c.ab.kind]})</span></div><div class="text-xs mt-1">${c.ab.desc}</div><div class="text-[11px] mt-2 mb-1 ${A?'text-emerald-400':'text-red-400'}">${A?`Despertar Nv ${A}/5`:'🔒 Habilidad dormida: despiértala para usarla en combate'}</div><div class="border-t border-slate-700 pt-1">${evHTML}</div></div>
  <div class="text-xs text-slate-400 mb-2">Copias sobrantes: <b class="text-white">${e.dupes}</b></div>
  <div class="grid grid-cols-2 gap-2">
   <button class="btn" ${l>=10||S.coins<lc.c||e.dupes<lc.d?'disabled':''} onclick="levelUp('${n}')">⬆️ Nivel ${l}→${Math.min(10,l+1)}<br><span class="text-[10px] font-bold">${l>=10?'MÁX':`🪙${lc.c} + ${lc.d} copia(s)`}</span></button>
@@ -906,7 +916,7 @@ const FSHOP=[{id:'f10',n:'Bolsa de Fragmentos',ic:'👝',f:10,p:350},{id:'f50',n
 function buyFrags(id){const s=FSHOP.find(x=>x.id===id);if(S.coins<s.p)return toast('Monedas insuficientes');S.coins-=s.p;S.frags+=s.f;save();hdr();snd('win');toast('+'+s.f+' 🧩');render()}
 async function buy(id){const s=SHOP.find(x=>x.id===id);if(S.coins<s.p)return toast('Monedas insuficientes');S.coins-=s.p;hdr();const n=s.c||3+Math.floor(Math.random()*3);await openPacks(s.k,n,s.n,s.ic);render()}
 const fmt=ms=>{const s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return`${h?h+'h ':''}${String(m).padStart(2,'0')}m ${String(s%60).padStart(2,'0')}s`};
-function navGlow(){const b=document.querySelector('nav button[data-t="shop"]');if(!b||!S)return;const n=Date.now();b.classList.toggle('gift',n>=S.nextCoin||n>=S.nextPack)}
+function navGlow(){if(!S)return;const b=document.querySelector('nav button[data-t="shop"]');const n=Date.now();if(b)b.classList.toggle('gift',n>=S.nextCoin||n>=S.nextPack);const nb=document.querySelector('nav button[data-t="news"]');if(nb)nb.classList.toggle('news',S.patchSeen!==PATCHES[0].id&&TAB!=='news')}
 function tickGifts(){if(!S)return;navGlow();const g=$('#gifts');if(!g)return;const now=Date.now();const c=S.nextCoin-now,p=S.nextPack-now;
  g.innerHTML=`<div class="panel text-center"><div class="text-3xl">🪙</div><div class="text-xs font-black mt-1">Regalo de monedas</div><div class="text-[11px] text-slate-400 mb-2">+150 cada 1 h</div>${c<=0?`<button class="btn gold w-full !py-2" onclick="claimCoins()">¡Reclamar!</button>`:`<div class="text-sm font-black text-slate-300 py-2">⏳ ${fmt(c)}</div>`}</div>
  <div class="panel text-center"><div class="text-3xl">🎁</div><div class="text-xs font-black mt-1">Sobre gratis</div><div class="text-[11px] text-slate-400 mb-2">Cada 8 h</div>${p<=0?`<button class="btn gold w-full !py-2" onclick="claimPack()">¡Abrir!</button>`:`<div class="text-sm font-black text-slate-300 py-2">⏳ ${fmt(p)}</div>`}</div>`}
@@ -1052,12 +1062,14 @@ function tLvl(i){const t=S.tourn;if(t.team[i].lvl>=10)return toast('Ya está al 
  if(t.pts<=0||t.team.every(x=>x.lvl>=10)){t.pts=null;t.r++;t.stage='ready';t.enemy=enemyTeam(t.diff,t.r)}save();render()}
 
 /* ===================== AJUSTES / RANKING ===================== */
-function vSet(){return`<div class="text-center mb-3"><div class="text-xl font-black">⚙️ Ajustes & Ranking</div></div>
- <div class="panel mb-3"><div class="font-black text-sm mb-2">🌍 Ranking global</div><div id="rank" class="text-sm text-slate-400">Cargando…</div></div>
+function vSet(){return`<div class="text-center mb-3"><div class="text-xl font-black">⚙️ Ajustes</div></div>
  <div class="panel mb-3 space-y-2"><div class="font-black text-sm">👤 Sesión</div><div class="text-xs text-slate-300">${S.name} · ${USER?'Cuenta en la nube':'Modo local (sin nube)'}</div><div class="text-xs text-slate-400">Puntuación: <b class="text-amber-300">${score()}</b></div>
   ${USER?`<button class="btn gray w-full !py-2" onclick="cloudSave().then(()=>toast('Guardado en la nube'))">☁️ Guardar ahora</button>`:''}<button class="btn red w-full !py-2" onclick="logout()">Cerrar sesión</button></div>
  <div class="panel mb-3"><div class="font-black text-sm mb-2">🔊 Sonido</div><button class="btn ${S.sound?'':'gray'} w-full !py-2" onclick="S.sound=!S.sound;save();render()">${S.sound?'Sonido activado':'Sonido desactivado'}</button></div>
  <div class="panel"><div class="font-black text-sm mb-2">🗑️ Datos</div><button class="btn red w-full !py-2 font-black" onclick="deleteAccount(event)">🗑️ Eliminar partida</button><div class="text-[10px] text-slate-500 mt-3">Proyecto de fans sin ánimo de lucro, no afiliado a Marvel ni Disney.</div></div>`}
+function vNews(){return`<div class="text-center mb-3"><div class="text-xl font-black">📰 Noticias</div></div>
+ <div class="panel mb-3"><div class="font-black text-sm mb-2">🌍 Ranking global</div><div id="rank" class="text-sm text-slate-400">Cargando…</div></div>
+ <div class="panel"><div class="font-black text-sm mb-2">📜 Historial de parches</div>${PATCHES.map((p,i)=>`<div class="${i?'mt-3 pt-3 border-t border-slate-800':''}"><div class="font-black text-sm text-sky-300">${p.title}${i===0?' <span class="text-[10px] text-amber-300">NUEVO</span>':''}</div><ul class="mt-1 space-y-1 text-xs text-slate-300 list-disc pl-4">${p.items.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>`}
 async function loadRanking(){const el=$('#rank');if(!el)return;if(!sb){el.innerHTML=`<div>Ranking solo disponible con cuenta en la nube.</div><div class="mt-1 text-amber-300 font-bold">Tu puntuación local: ${score()}</div>`;return}
  const{data,error}=await sb.from('ranking').select('username,score,tower_done').order('score',{ascending:false}).limit(50);if(!$('#rank'))return;
  if(error||!data)return el.textContent='No se pudo cargar el ranking (¿ejecutaste el SQL de configuración?).';
